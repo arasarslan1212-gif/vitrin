@@ -1,0 +1,1710 @@
+<!doctype html>
+<!-- Vitrin — your shop window, online (EN / TR / ES) — motion edition -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vitrin — Websites for local businesses</title>
+<meta name="description" content="Vitrin builds modern websites for cafés, salons, clinics, and local shops: hours, menu, prices, photos, and location in one place. $250 once, then $49 a year. No monthly fees.">
+<meta name="theme-color" content="#1F6F50">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Vitrin — Your shop window, online">
+<meta property="og:description" content="Modern websites for local businesses. The link customers tap on Google Maps and Instagram. $250 once, then $49 a year.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F6F50'/%3E%3Cpath d='M17 18h8l7 21 7-21h8L36 47h-8z' fill='%23FAFBF8'/%3E%3Ccircle cx='48' cy='45' r='3.5' fill='%23C24D2C'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Inter:wght@400;500;600&family=Spline+Sans+Mono:wght@500;700&display=swap">
+<script>
+  /* Motion boot — runs before first paint. Reduced-motion visitors never get .mo, so they see the static page.
+     The animation libraries start downloading right away (in parallel, executed in order). */
+  (function(){
+    var d = document.documentElement;
+    if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce) return;
+    d.classList.add('mo');
+    try{ if(localStorage.getItem('vitrin-seen') === '1') d.classList.add('seen'); }catch(e){}
+
+    var CDN = 'https://cdn.jsdelivr.net/npm/';
+    var libs = [
+      [CDN + 'gsap@3.15.0/dist/gsap.min.js', 'sha384-XmJ9SoHtVOHoQUcKvFAzVXwdkKo1Ie3bhmSoIAkcdsHGaIrVJIkmozyq0FJeb/Ly'],
+      [CDN + 'gsap@3.15.0/dist/ScrollTrigger.min.js', 'sha384-wl5TeDVvOWt30Pbf8aSo2ZrzsOjddu3avOBvHe+p+OhJt9gP6w9YXmDkN5DK2/dF']
+    ];
+    /* smooth wheel scrolling only for mouse / trackpad; phones keep native touch scrolling */
+    if(window.matchMedia('(pointer:fine)').matches)
+      libs.push([CDN + 'lenis@1.3.27/dist/lenis.min.js', 'sha384-R18XzqnxvVLEF+BYfhpmDx30v7eP83fAckyfoRzK7/Uf6nGqufcmsk0eAKo7S3RU', true]);
+
+    var left = libs.length;
+    function done(){ if(--left === 0){ window.__moReady = true; if(window.__moGo) window.__moGo(); } }
+    libs.forEach(function(l){
+      var s = document.createElement('script');
+      s.src = l[0]; s.integrity = l[1]; s.crossOrigin = 'anonymous'; s.async = false;
+      s.onload = done;
+      s.onerror = function(){ if(l[2]) done(); else window.__moOff(); };   // Lenis is optional
+      document.head.appendChild(s);
+    });
+
+    /* static fallback: show everything, fade the preloader away */
+    window.__moOff = function(){
+      clearTimeout(window.__moFail);
+      if(!d.classList.contains('mo')) return;
+      d.classList.remove('mo');
+      d.classList.add('mo-off');
+      setTimeout(function(){ var p = document.getElementById('preloader'); if(p && p.parentNode) p.parentNode.removeChild(p); }, 600);
+    };
+    window.__moFail = setTimeout(window.__moOff, 4500);   // failsafe: libraries too slow or blocked
+  })();
+</script>
+<style>
+  /* ===================== TOKENS ===================== */
+  :root{
+    --plaster:#EDEFE9;
+    --ink:#22302B;
+    --awning:#1F6F50;
+    --awning-dark:#175540;
+    --brick:#C24D2C;
+    --paper:#FAFBF8;
+    --line:rgba(34,48,43,.14);
+    --muted:rgba(34,48,43,.72);
+    --display:'Bricolage Grotesque',system-ui,sans-serif;
+    --body:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'Spline Sans Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{background:var(--plaster);color:var(--ink);font-family:var(--body);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  ::selection{background:var(--awning);color:var(--paper)}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--awning);outline-offset:3px}
+  .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  .defs{position:absolute;width:0;height:0;overflow:hidden}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  @media (max-width:560px){ .wrap{padding:0 20px} }
+  .ico{width:14px;height:14px;flex:none;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+  /* the striped awning: tiles at a fixed size, so stripes look the same on a phone and a 4K screen */
+  .awn{display:block;width:100%;height:34px}
+
+  /* ===================== TOP BAR ===================== */
+  .topbar{position:sticky;top:0;z-index:50;background:var(--plaster)}
+  nav{display:flex;justify-content:space-between;align-items:center;padding:14px 0;gap:12px;flex-wrap:wrap}
+  .logo{font-family:var(--display);font-weight:800;font-size:1.4rem;letter-spacing:-.02em;text-decoration:none}
+  .logo span{color:var(--awning)}
+  .nav-right{display:flex;align-items:center;gap:12px}
+  .lang{display:flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--paper)}
+  .lang button{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.08em;background:transparent;border:0;color:var(--muted);padding:8px 12px;min-height:34px;cursor:pointer}
+  .lang button:hover{color:var(--ink)}
+  .lang button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+  .lang button:focus-visible{outline-offset:-3px}
+  .cta-mini{display:inline-block;font-size:.85rem;font-weight:600;color:var(--paper);background:var(--ink);text-decoration:none;padding:9px 18px;border-radius:999px;white-space:nowrap}
+  .cta-mini:hover{background:var(--awning)}
+  @media (max-width:420px){ .logo{font-size:1.25rem} .nav-right{gap:8px} .cta-mini{padding:9px 14px;font-size:.8rem} .lang button{padding:8px 10px} }
+
+  /* ===================== HERO ===================== */
+  header{position:relative;overflow:hidden;padding:64px 0 92px}
+  header .wrap{position:relative;z-index:1}
+  .ghost{position:absolute;right:-4vw;top:8px;z-index:0;pointer-events:none;user-select:none;
+    font-family:var(--display);font-weight:800;font-size:clamp(9rem,27vw,23rem);line-height:.9;letter-spacing:-.05em;
+    color:transparent;-webkit-text-stroke:1.5px rgba(34,48,43,.09)}
+  .open-sign{display:inline-flex;align-items:center;gap:10px;margin-bottom:24px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:8px 16px 8px 14px;font-size:.82rem;font-weight:600}
+  .open-sign .dot,.ph-open .dot{width:9px;height:9px;border-radius:50%;background:var(--awning);flex:none;animation:pulse 2.4s ease-in-out infinite}
+  .is-full .open-sign .dot{background:var(--brick)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .eyebrow{font-family:var(--mono);font-size:.76rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--awning);margin-bottom:18px}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(2.5rem,6.6vw,4.5rem);line-height:1.02;letter-spacing:-.025em;max-width:20ch;text-wrap:balance}
+  h1 em{font-style:normal;color:var(--awning)}
+  .sub{max-width:52ch;margin:24px 0 32px;font-size:1.08rem;color:var(--muted)}
+  .sub strong{color:var(--ink);font-weight:600}
+
+  /* waitlist form */
+  .signup{display:flex;gap:10px;max-width:500px;flex-wrap:wrap;position:relative}
+  .signup input[type="email"]{flex:1 1 230px;min-width:0;min-height:54px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:15px 18px;color:var(--ink);font:inherit;font-size:1rem}
+  .signup input::placeholder{color:rgba(34,48,43,.45)}
+  .signup input:focus{outline:2px solid var(--awning);outline-offset:1px;border-color:transparent}
+  .btn{flex:0 0 auto;min-height:54px;font-family:var(--display);font-weight:700;font-size:1rem;background:var(--awning);color:var(--paper);border:0;border-radius:12px;padding:15px 24px;cursor:pointer}
+  .btn:hover{background:var(--awning-dark)}
+  .btn:disabled{opacity:.72;cursor:progress}
+  .btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  @media (max-width:520px){ .btn{flex:1 1 100%} }
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .msg{margin-top:12px;font-size:.92rem;font-weight:600;min-height:1.5em}
+  .msg.ok{color:var(--awning-dark)}
+  .msg.err{color:var(--brick)}
+  .form-note{font-size:.84rem;color:var(--muted);max-width:52ch}
+
+  /* founding-spots counter */
+  .counter{display:flex;align-items:center;gap:12px 14px;margin-top:30px;font-family:var(--mono);flex-wrap:wrap}
+  .counter .n{font-size:1.6rem;font-weight:700;line-height:1;color:var(--awning);font-variant-numeric:tabular-nums}
+  .counter .l{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .pips{display:flex;gap:5px}
+  .pips i{width:22px;height:8px;border-radius:4px;border:1.5px solid var(--awning)}
+  .pips i.on{background:var(--awning)}
+  .is-full .counter .n{color:var(--brick)}
+  .is-full .pips i{border-color:var(--brick);background:var(--brick)}
+  .launch-rule{font-family:var(--mono);font-size:.76rem;letter-spacing:.04em;color:var(--muted);margin-top:10px;max-width:50ch}
+  .launch-rule b{color:var(--awning-dark)}
+
+  /* ===================== MARQUEES ===================== */
+  .mq{overflow:hidden;white-space:nowrap}
+  .mq-a{background:var(--awning);color:var(--paper);padding:16px 0;border-top:1px solid var(--awning-dark)}
+  .mq-b{background:var(--ink);color:var(--paper);padding:11px 0}
+  .mq-track{display:inline-flex}
+  .mq-a span{font-family:var(--display);font-weight:800;font-size:clamp(1.3rem,3vw,2.1rem);letter-spacing:-.01em;padding-right:1.1em}
+  .mq-a span::after{content:'\2726';color:var(--brick);margin-left:1.1em;font-size:.6em;vertical-align:middle}
+  .mq-b span{font-family:var(--mono);font-weight:700;font-size:.74rem;letter-spacing:.2em;text-transform:uppercase;padding-right:2.2em}
+  .mq-b span::after{content:'\2726';color:#7CC7A4;margin-left:2.2em}
+
+  /* ===================== SECTIONS ===================== */
+  section{position:relative;padding:96px 0;border-top:1px solid var(--line)}
+  @media (max-width:700px){ section{padding:72px 0} }
+  .hang-sign{display:inline-block;position:relative;background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;padding:7px 16px;border-radius:6px;margin-bottom:18px}
+  .hang-sign::before,.hang-sign::after{content:'';position:absolute;top:-10px;width:1px;height:10px;background:rgba(34,48,43,.3)}
+  .hang-sign::before{left:18px}
+  .hang-sign::after{right:18px}
+  h2{font-family:var(--display);font-weight:800;font-size:clamp(1.8rem,3.8vw,2.6rem);line-height:1.08;letter-spacing:-.02em;margin-bottom:14px;max-width:24ch;text-wrap:balance}
+  .lede{color:var(--muted);max-width:54ch;margin-bottom:40px;font-size:1.02rem}
+  .lede,.sub,.form-note,.card p,.step p,.faq .a,.final-sub{text-wrap:pretty}
+
+  /* -- where customers find you -- */
+  .found-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.92fr);gap:48px;align-items:center}
+  .found .lede{margin-bottom:28px}
+  .needs-lbl{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .needs{list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+  .needs li{display:inline-flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:.88rem;font-weight:600}
+  .needs .ico{color:var(--awning)}
+  .phone-stage{position:relative;display:flex;justify-content:center;padding:24px 0}
+  .phone{position:relative;width:282px;border-radius:44px;background:var(--ink);padding:10px;box-shadow:0 40px 70px -40px rgba(34,48,43,.55),0 0 0 1px rgba(34,48,43,.25)}
+  .phone::before{content:'';position:absolute;top:18px;left:50%;width:72px;height:20px;margin-left:-36px;border-radius:12px;background:var(--ink);z-index:2}
+  .screen{position:relative;height:560px;border-radius:34px;overflow:hidden;background:var(--paper);font-size:.8rem;line-height:1.35}
+  .ph-bar{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 16px 10px;background:var(--plaster)}
+  .ph-time{align-self:flex-start;font-weight:600;font-size:.7rem;padding-left:8px}
+  .ph-url{display:flex;align-items:center;gap:6px;width:100%;justify-content:center;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:5px 10px;font-size:.7rem;color:var(--muted)}
+  .ph-url .ico{width:11px;height:11px}
+  .ph-awn{display:block;width:100%;height:17px}
+  .ph-body{padding:14px 16px 0;display:grid;gap:14px}
+  .ph-name{font-family:var(--display);font-weight:800;font-size:1.3rem;letter-spacing:-.02em;line-height:1.1}
+  .ph-kind{font-size:.72rem;color:var(--muted);margin-top:2px}
+  .ph-open{display:inline-flex;align-items:center;gap:7px;margin-top:8px;font-size:.72rem;font-weight:600;color:var(--awning-dark);background:rgba(31,111,80,.1);border-radius:999px;padding:4px 10px 4px 8px}
+  .ph-open .dot{width:7px;height:7px}
+  .ph-btns{display:flex;gap:6px}
+  .ph-btns span{flex:1 1 auto;text-align:center;font-size:.68rem;font-weight:600;border:1px solid var(--line);border-radius:10px;padding:7px 6px;white-space:nowrap}
+  .ph-btns span.on{background:var(--awning);border-color:var(--awning);color:var(--paper)}
+  .ph-photos{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;height:76px}
+  .ph-photos i{border-radius:10px}
+  .ph-photos .p1{background:radial-gradient(circle at 50% 52%,#F4E9DA 0 17%,#C08A5D 18% 30%,#FAFBF8 31% 37%,transparent 38%),#E7D9C6}
+  .ph-photos .p2{background:radial-gradient(ellipse 34% 22% at 50% 58%,#D99A4E 0 70%,transparent 72%),linear-gradient(160deg,#F0D9B5,#E2B97F)}
+  .ph-photos .p3{background:repeating-linear-gradient(90deg,#1F6F50 0 8px,#FAFBF8 8px 16px) top/100% 22% no-repeat,linear-gradient(#22302B,#22302B) 50% 82%/38% 46% no-repeat,#C9D4CB}
+  .ph-h{font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brick);margin-bottom:6px}
+  .ph-item{display:flex;align-items:baseline;gap:6px;padding:5px 0;font-size:.76rem}
+  .ph-item i{flex:1;border-bottom:1px dotted rgba(34,48,43,.3);transform:translateY(-3px)}
+  .ph-item b{font-weight:700;white-space:nowrap}
+  .ph-map{display:grid;gap:6px}
+  .ph-mapimg{position:relative;height:74px;border-radius:12px;overflow:hidden;
+    background:linear-gradient(115deg,transparent 0 58%,rgba(250,251,248,.95) 58% 62%,transparent 62%),
+      repeating-linear-gradient(0deg,transparent 0 20px,rgba(250,251,248,.9) 20px 23px),
+      repeating-linear-gradient(90deg,transparent 0 28px,rgba(250,251,248,.9) 28px 31px),#D5E1D6}
+  .ph-pin{position:absolute;left:52%;top:30%;width:16px;height:16px;margin-left:-8px;border-radius:50% 50% 50% 0;background:var(--brick);transform:rotate(-45deg);box-shadow:0 0 0 3px rgba(194,77,44,.2)}
+  .ph-pin::after{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--paper)}
+  .ph-addr{font-size:.7rem;color:var(--muted)}
+  .chip{position:absolute;z-index:3;display:grid;gap:5px;min-width:180px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 12px;text-align:left;box-shadow:0 18px 36px -22px rgba(34,48,43,.5);font-size:.72rem;line-height:1.3}
+  .chip.c1{left:-28px;top:7%}
+  .chip.c2{right:-28px;bottom:11%}
+  .chip-src{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .chip-src .ico{width:12px;height:12px;color:var(--brick)}
+  .chip-name{font-family:var(--display);font-weight:700;font-size:.92rem}
+  .chip-btns{display:flex;gap:4px}
+  .chip-btns i{font-style:normal;font-size:.62rem;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:3px 7px;white-space:nowrap}
+  .chip-btns i.hl{background:var(--awning);border-color:var(--awning);color:var(--paper)}
+  .chip-link{display:flex;align-items:center;gap:5px;font-weight:600;color:var(--awning-dark)}
+  .chip-link .ico{width:12px;height:12px}
+  @media (max-width:899px){
+    .found-grid{grid-template-columns:1fr;gap:24px}
+    .phone-stage{padding:50px 0 62px}
+    .chip.c1{left:0;top:0}
+    .chip.c2{right:0;bottom:0}
+  }
+  @media (max-width:400px){ .phone{width:264px} .screen{height:530px} .ph-body{gap:11px} .ph-photos{height:64px} .chip{min-width:0} }
+
+  /* -- what you get -- */
+  .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  @media (max-width:899px){ .cards{grid-template-columns:1fr} }
+  .card{position:relative;overflow:hidden;isolation:isolate;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:28px;transition:transform .18s ease,border-color .18s ease}
+  html:not(.mo) .card:hover{transform:translateY(-3px)}
+  .card:hover{border-color:var(--awning)}
+  .mo .card{transition:border-color .2s ease}
+  .card .tag{font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brick)}
+  .card h3{font-family:var(--display);font-weight:700;font-size:1.15rem;margin:10px 0 8px}
+  .card p{font-size:.93rem;color:var(--muted)}
+  /* cursor glow: moved with transforms, so hovering never repaints the card */
+  .card-glow{position:absolute;left:0;top:0;z-index:-1;width:380px;height:380px;margin:-190px 0 0 -190px;border-radius:50%;pointer-events:none;opacity:0;
+    background:radial-gradient(closest-side,rgba(31,111,80,.13),rgba(31,111,80,0))}
+
+  /* -- how it works: horizontal pinned track on desktop, stacked on phones -- */
+  .how .steps{display:grid;gap:16px;margin-top:6px}
+  .step{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:22px;min-height:210px;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:30px}
+  .step .num{display:inline-block;font-family:var(--display);font-weight:800;font-size:clamp(3rem,7vw,5.2rem);line-height:.85;letter-spacing:-.04em;color:var(--awning)}
+  .step h3{font-family:var(--display);font-weight:700;font-size:1.35rem;margin-bottom:8px}
+  .step p{font-size:.96rem;color:var(--muted);max-width:42ch}
+  .step:last-child{background:var(--awning);color:var(--paper);border-color:var(--awning)}
+  .step:last-child .num{color:var(--paper)}
+  .step:last-child p{color:rgba(250,251,248,.82)}
+  .how-progress{display:none;position:relative;height:2px;margin:0 0 26px;overflow:hidden;border-radius:2px;background:var(--line)}
+  .how-progress i{position:absolute;inset:0;background:var(--awning);transform:scaleX(0);transform-origin:left}
+  @media (min-width:900px){
+    .mo .how{min-height:100vh;display:flex;align-items:center;overflow:hidden}
+    .mo .how > .wrap{width:100%}
+    .mo .how .lede{margin-bottom:26px}
+    .mo .how-progress{display:block;max-width:420px}
+    .mo .how .steps{display:flex;width:max-content;gap:24px;padding-right:48px}
+    .mo .how .step{flex:none;width:min(540px,44vw);min-height:330px;justify-content:space-between}
+  }
+
+  /* -- before / after: strike-throughs + a metal shutter that rolls up -- */
+  .strip{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px}
+  @media (max-width:700px){ .strip{grid-template-columns:1fr} }
+  .pane{position:relative;overflow:hidden;border-radius:16px;padding:28px;border:1px solid var(--line)}
+  .pane.after{background:var(--awning);color:var(--paper);border-color:var(--awning)}
+  .pane .lbl{font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;opacity:.75}
+  .pane ul{list-style:none;margin-top:16px;display:grid;gap:12px}
+  .pane li{position:relative;justify-self:start;padding-left:24px;font-size:.95rem}
+  .pane.before li::before{content:'\2715';position:absolute;left:0;top:0;color:var(--brick);font-weight:700}
+  .pane.after li::before{content:'\2713';position:absolute;left:0;top:0;font-weight:700}
+  html:not(.mo) .pane.before .t{opacity:.62;text-decoration:line-through;text-decoration-color:rgba(194,77,44,.7);text-decoration-thickness:1.5px}
+  .strike{display:none}
+  .mo .strike{display:block;position:absolute;left:0;top:0;width:0;height:1.5px;background:var(--brick);transform:scaleX(0);transform-origin:0 50%;pointer-events:none}
+  .shutter{display:none}
+  .mo .shutter{display:block;position:absolute;inset:0;z-index:3;border-radius:inherit;background:repeating-linear-gradient(180deg,#34463f 0 13px,#22302B 13px 15px)}
+  .mo .shutter::after{content:'';position:absolute;left:50%;bottom:14px;width:48px;height:6px;margin-left:-24px;border-radius:3px;background:#62756d}
+  @media (min-width:900px) and (min-height:620px){
+    .mo .ba{min-height:100vh;display:flex;align-items:center}
+    .mo .ba > .wrap{width:100%}
+  }
+
+  /* -- pricing: two price tags hanging on strings -- */
+  .pricing{text-align:center}
+  .pricing h2{margin-left:auto;margin-right:auto}
+  .setup-line{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;color:var(--muted)}
+  .tags{display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:0 32px}
+  .price-tag{position:relative;display:flex;flex-direction:column;align-items:center;min-width:272px;margin-top:70px;padding:40px 40px 30px;background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:0 4px 0 rgba(34,48,43,.06)}
+  .price-tag::before{content:'';position:absolute;top:-9px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--plaster);border:1px solid var(--line)}
+  .tag-string{position:absolute;left:50%;bottom:calc(100% + 9px);width:1px;height:56px;background:rgba(34,48,43,.28)}
+  .tag-year{margin-top:100px}
+  .tag-year .tag-string{height:86px}
+  .tag-kicker{font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--brick);margin-bottom:12px}
+  .amount{display:flex;align-items:flex-start;justify-content:center;font-family:var(--display);font-weight:800;font-size:clamp(2.8rem,6.4vw,3.8rem);line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+  .amount .cur{font-size:.45em;line-height:1.15;margin:0 .04em}
+  .amount .cur.post{margin-left:.14em}
+  html[lang="en"] .amount .cur.post,html:not([lang="en"]) .amount .cur.pre{display:none}
+  .amount .unit{align-self:flex-end;margin:0 0 .3em .3em;font-family:var(--mono);font-size:.3em;font-weight:700;letter-spacing:.04em;color:var(--muted)}
+  .tag-year .amount{font-size:clamp(2.3rem,4.8vw,2.9rem)}
+  .per{display:block;margin-top:10px;font-family:var(--mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .lock{display:inline-block;margin-top:18px;background:var(--awning);color:var(--paper);font-size:.8rem;font-weight:600;padding:7px 14px;border-radius:999px}
+  .is-full .lock{background:var(--ink)}
+  .tag-list{list-style:none;display:grid;gap:8px;max-width:30ch;margin-top:16px;text-align:left;font-size:.88rem}
+  .tag-list li{position:relative;padding-left:22px}
+  .tag-list li::before{content:'\2713';position:absolute;left:0;color:var(--awning);font-weight:700}
+  .price-includes{margin-top:30px;font-size:.95rem;color:var(--muted)}
+  @media (max-width:640px){
+    .tags{flex-direction:column;align-items:center}
+    .price-tag{min-width:0;width:100%;max-width:330px;padding:36px 26px 28px}
+    .tag-year{margin-top:88px}
+    .tag-year .tag-string{height:76px}
+  }
+
+  /* -- questions -- */
+  .faq-grid{display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:48px;align-items:start}
+  @media (max-width:899px){ .faq-grid{grid-template-columns:1fr;gap:8px} }
+  .faq-list{display:grid;gap:10px}
+  .faq details{background:var(--paper);border:1px solid var(--line);border-radius:14px;transition:border-color .2s ease}
+  .faq details[open]{border-color:rgba(31,111,80,.45)}
+  .faq summary{position:relative;list-style:none;cursor:pointer;padding:19px 60px 19px 22px;font-family:var(--display);font-weight:700;font-size:1.04rem;line-height:1.35;border-radius:14px}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:'+';position:absolute;right:18px;top:50%;width:28px;height:28px;margin-top:-14px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-family:var(--mono);font-weight:500;font-size:1rem;line-height:1;color:var(--awning);transition:transform .3s var(--ease)}
+  .faq details[open] summary::after{transform:rotate(45deg)}
+  .faq summary:focus-visible{outline-offset:-2px}
+  .faq .a{padding:0 22px 20px;color:var(--muted);max-width:62ch;font-size:.95rem}
+
+  /* -- final CTA: a shop window that opens up as you scroll -- */
+  .final{padding:0;border-top:0;text-align:center;overflow:hidden}
+  .window{position:relative;color:var(--paper);padding:136px 0 116px}
+  .win-bg{position:absolute;inset:0;z-index:0;overflow:hidden;background:var(--awning)}
+  /* the window is wider than the screen, so its rounded corners slide out of view at full size:
+     only transform changes while scrolling, never border-radius */
+  .mo .win-bg{left:-48px;right:-48px;border-radius:32px;transform:scale(.7,.82)}
+  @media (max-width:700px){ .mo .win-bg{left:-24px;right:-24px;border-radius:22px;transform:scale(.82,.9)} }
+  .w-awning{position:absolute;top:0;left:0;right:0}
+  .window > .wrap{position:relative;z-index:1}
+  .window .hang-sign{background:var(--paper);color:var(--ink)}
+  .window .hang-sign::before,.window .hang-sign::after{background:rgba(250,251,248,.45)}
+  .window h2{color:var(--paper);font-size:clamp(2.1rem,5.6vw,3.8rem);line-height:1.04;max-width:16ch;margin:0 auto 14px}
+  .final-sub{max-width:46ch;margin:0 auto;color:rgba(250,251,248,.84)}
+  .window .signup{margin:30px auto 0;justify-content:center}
+  .window .signup input{background:var(--paper);border-color:transparent}
+  .window .signup input:focus{outline-color:var(--paper)}
+  .window .btn{background:var(--ink)}
+  .window .btn:hover{background:var(--brick)}
+  .window .btn:focus-visible{outline-color:var(--paper)}
+  .window .msg.ok{color:var(--paper)}
+  .window .msg.err{color:#FFD2C4}
+  .trust{margin-top:4px;font-size:.84rem;color:rgba(250,251,248,.78)}
+
+  footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px 20px;border-top:1px solid var(--line);padding:26px 0 30px;font-size:.82rem;color:var(--muted)}
+  footer .loc{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+
+  /* ===================== MOTION EDITION ===================== */
+  html.lenis,html.lenis body{height:auto}
+  .lenis.lenis-smooth{scroll-behavior:auto!important}
+
+  /* preloader: a green shop shutter that rolls up. Its intro is pure CSS, so it starts on first paint. */
+  .preloader{display:none}
+  .mo .preloader,.mo-off .preloader{display:flex;position:fixed;inset:0;z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+    background:var(--awning);color:var(--paper);will-change:transform;touch-action:none}
+  .mo-off .preloader{opacity:0;pointer-events:none;transition:opacity .45s ease}
+  .pl-logo{display:flex;overflow:hidden;padding:0 .04em .1em;font-family:var(--display);font-weight:800;font-size:clamp(3.2rem,11vw,6rem);line-height:1;letter-spacing:-.03em}
+  .pl-l{display:inline-block}
+  .pl-l i{display:inline-block;font-style:normal}
+  .pl-l.dot{color:var(--brick)}
+  .mo .pl-l i{animation:plIn .8s var(--ease) both}
+  .mo .pl-l:nth-child(2) i{animation-delay:.035s}
+  .mo .pl-l:nth-child(3) i{animation-delay:.07s}
+  .mo .pl-l:nth-child(4) i{animation-delay:.105s}
+  .mo .pl-l:nth-child(5) i{animation-delay:.14s}
+  .mo .pl-l:nth-child(6) i{animation-delay:.175s}
+  .mo .pl-l:nth-child(7) i{animation-delay:.21s}
+  @keyframes plIn{from{transform:translate3d(0,115%,0)}to{transform:translate3d(0,0,0)}}
+  .pl-row{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.2em;opacity:.85}
+  .pl-bar{width:min(200px,46vw);height:2px;overflow:hidden;border-radius:2px;background:rgba(250,251,248,.25)}
+  .pl-bar i{display:block;height:100%;background:var(--paper);transform:scaleX(0);transform-origin:left}
+  .mo .pl-bar i{animation:plBar .65s cubic-bezier(.45,0,.55,1) .05s both}
+  .mo-off .pl-bar i{transform:none}
+  @keyframes plBar{to{transform:scaleX(1)}}
+  .seen .pl-l i,.seen .pl-bar i{animation:none;transform:none}
+  #plNum{min-width:3ch;font-variant-numeric:tabular-nums}
+  .pl-edge{position:absolute;left:0;right:0;top:100%}
+
+  /* scroll progress + cursor halo */
+  .progress{display:none}
+  .mo .progress{display:block;position:fixed;top:0;left:0;right:0;height:3px;z-index:90;pointer-events:none}
+  .progress i{display:block;height:100%;background:var(--brick);transform:scaleX(0);transform-origin:left}
+  .cursor{position:fixed;top:0;left:0;z-index:95;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:var(--awning);pointer-events:none;opacity:0}
+  .cursor{display:none}
+  .mo .cursor{display:block}
+  @media (pointer:coarse){ .mo .cursor{display:none} }
+
+  /* starting states, set before first paint (only while motion is on; GSAP takes over from here) */
+  .mo [data-r]:not(.is-in),.mo .hang-sign:not(.is-in),.mo .price-tag:not(.is-in),.mo .phone:not(.is-in),.mo .chip:not(.is-in){opacity:0}
+  .mo .split:not(.is-in) .w > i{transform:translate3d(0,118%,0)}
+
+  /* masked words */
+  .w{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .04em .14em;margin:0 -.04em -.14em}
+  .w > i{display:inline-block;font-style:inherit}
+
+  /* section dividers draw themselves in */
+  .mo section{border-top-color:transparent}
+  .sec-line{position:absolute;top:0;left:0;right:0;height:1px;background:var(--line);transform:scaleX(0);transform-origin:0 50%;pointer-events:none}
+
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition:none!important;animation:none!important}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<svg class="defs" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="awnP" width="120" height="34" patternUnits="userSpaceOnUse">
+      <rect width="120" height="24" fill="#1F6F50"/>
+      <rect x="60" width="60" height="24" fill="#FAFBF8"/>
+      <path d="M0 24Q15 34 30 24Q45 34 60 24Q75 34 90 24Q105 34 120 24Z" fill="#175540"/>
+    </pattern>
+    <pattern id="awnS" width="60" height="17" patternUnits="userSpaceOnUse">
+      <rect width="60" height="12" fill="#1F6F50"/>
+      <rect x="30" width="30" height="12" fill="#FAFBF8"/>
+      <path d="M0 12Q7.5 17 15 12Q22.5 17 30 12Q37.5 17 45 12Q52.5 17 60 12Z" fill="#175540"/>
+    </pattern>
+  </defs>
+</svg>
+
+<div class="preloader" id="preloader" aria-hidden="true">
+  <div class="pl-logo"><span class="pl-l"><i>V</i></span><span class="pl-l"><i>i</i></span><span class="pl-l"><i>t</i></span><span class="pl-l"><i>r</i></span><span class="pl-l"><i>i</i></span><span class="pl-l"><i>n</i></span><span class="pl-l dot"><i>.</i></span></div>
+  <div class="pl-row"><div class="pl-bar"><i></i></div><span id="plNum">000</span></div>
+  <div class="pl-edge"><svg class="awn"><rect width="100%" height="34" fill="url(#awnP)"/></svg></div>
+</div>
+<script>
+  /* preloader counter, in step with the CSS bar (runs before the animation libraries arrive) */
+  (function(){
+    var d = document.documentElement, el = document.getElementById('plNum');
+    window.__plT0 = performance.now();
+    if(!d.classList.contains('mo')) return;
+    if(d.classList.contains('seen')){ el.textContent = '100'; return; }
+    var t0 = window.__plT0, last = -1;
+    (function tick(now){
+      var t = Math.min(1, Math.max(0, (now - t0 - 50) / 650));
+      var v = Math.round((t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2) * 100);
+      if(v !== last){ last = v; el.textContent = String(v).padStart(3, '0'); }
+      if(t < 1) requestAnimationFrame(tick);
+    })(t0);
+  })();
+</script>
+<div class="progress" aria-hidden="true"><i id="progressBar"></i></div>
+<div class="cursor" id="cursor" aria-hidden="true"></div>
+
+<div class="topbar" id="topbar">
+  <svg class="awn" aria-hidden="true"><rect width="100%" height="34" fill="url(#awnP)"/></svg>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="#top" aria-label="Vitrin">Vitrin<span>.</span></a>
+      <div class="nav-right">
+        <div class="lang" role="group" aria-label="Language" data-i18n-aria="langLabel">
+          <button type="button" data-lang="en" aria-pressed="true">EN</button>
+          <button type="button" data-lang="tr" aria-pressed="false">TR</button>
+          <button type="button" data-lang="es" aria-pressed="false">ES</button>
+        </div>
+        <a class="cta-mini" href="#join" data-i18n="navCta">Join the waitlist</a>
+      </div>
+    </nav>
+  </div>
+</div>
+
+<header id="top">
+  <div class="ghost" id="ghost" aria-hidden="true">Vitrin.</div>
+  <div class="wrap">
+    <div class="open-sign" data-r><span class="dot" aria-hidden="true"></span><span data-i18n="openSign" data-i18n-full="openSignFull">Now taking founding clients</span></div>
+    <p class="eyebrow" data-r data-i18n="eyebrow">// Your shop window, online</p>
+    <h1><span data-i18n="h1a">Your business is great.</span><br><em data-i18n="h1b">Your online presence isn't.</em></h1>
+    <p class="sub" data-r data-i18n-html="sub">Customers find you on Google Maps and Instagram. Vitrin gives them a page worth landing on: your hours, menu, prices, photos, and location, all in one place. <strong>$250 once</strong>, then $49 a year. No monthly fees.</p>
+    <form class="signup" id="join" data-r action="https://formspree.io/f/YOUR_FORM_ID" method="POST" data-source="hero" data-msg="msg" novalidate>
+      <label class="sr-only" for="email" data-i18n="emailLabel">Email address</label>
+      <input type="email" id="email" name="email" required autocomplete="email" inputmode="email" data-i18n-ph="placeholder" placeholder="you@yourbusiness.com" aria-describedby="msg formNote">
+      <input type="hidden" name="language" value="en">
+      <input type="hidden" name="source" value="hero">
+      <div class="hp" aria-hidden="true"><input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></div>
+      <button class="btn" type="submit" data-i18n="btnHero" data-i18n-full="btnHeroFull">Claim a founding spot</button>
+    </form>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    <p class="form-note" id="formNote" data-r data-i18n="formNote" data-i18n-full="formNoteFull">First 3 founding businesses get the full build for $150 instead of $250. In return: honest feedback and a testimonial.</p>
+    <div class="counter" data-r aria-live="polite">
+      <span class="n"><span id="count">00</span>&thinsp;/&thinsp;3</span>
+      <span class="pips" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="l" data-i18n="counterLbl">founding spots filled</span>
+    </div>
+    <p class="launch-rule" data-r data-i18n-html="launchRule" data-i18n-full="launchRuleFull">We open <b>one week</b> after all 3 founding spots are filled.</p>
+  </div>
+</header>
+
+<div class="mq mq-a" aria-hidden="true"><div class="mq-track"><span data-i18n="marquee">Cafés · Salons · Clinics · Bakeries · Barbers · Boutiques · Restaurants · Florists</span><span data-i18n="marquee">Cafés · Salons · Clinics · Bakeries · Barbers · Boutiques · Restaurants · Florists</span></div></div>
+<div class="mq mq-b" aria-hidden="true"><div class="mq-track"><span data-i18n="marquee2">$250 build · $49 a year · No monthly fees · Unlimited small updates · Your own web address · Live in days</span><span data-i18n="marquee2">$250 build · $49 a year · No monthly fees · Unlimited small updates · Your own web address · Live in days</span></div></div>
+
+<section class="found">
+  <div class="wrap found-grid">
+    <div class="found-copy">
+      <span class="hang-sign" data-i18n="sign6">How customers find you</span>
+      <h2 data-i18n="h2f">Found on Maps. Chosen on your site.</h2>
+      <p class="lede" data-r data-i18n="ledeF">Almost nobody browses the web to pick a café or a barber. They search Google Maps or scroll Instagram, then tap your link. Vitrin makes sure that tap lands on a page that looks as good as your shop.</p>
+      <p class="needs-lbl" data-r data-i18n="needLbl">What they're looking for, in one place</p>
+      <ul class="needs">
+        <li data-r><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.4 1.6"/></svg><span data-i18n="n1">Hours</span></li>
+        <li data-r><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></svg><span data-i18n="n2">Menu</span></li>
+        <li data-r><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8.6 2.5h4.9v4.9l-6.1 6.1-4.9-4.9z"/><circle cx="11" cy="5" r=".9"/></svg><span data-i18n="n3">Prices</span></li>
+        <li data-r><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="4.5" width="12" height="8.5" rx="2"/><circle cx="8" cy="8.7" r="2.3"/><path d="M5.6 4.5l1-2h2.8l1 2"/></svg><span data-i18n="n4">Photos</span></li>
+        <li data-r><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14s4.5-4.2 4.5-7.6a4.5 4.5 0 0 0-9 0C3.5 9.8 8 14 8 14z"/><circle cx="8" cy="6.4" r="1.6"/></svg><span data-i18n="n5">Location</span></li>
+      </ul>
+    </div>
+    <div class="phone-stage">
+      <div class="chip c1" aria-hidden="true">
+        <span class="chip-src"><svg class="ico" viewBox="0 0 16 16"><path d="M8 14s4.5-4.2 4.5-7.6a4.5 4.5 0 0 0-9 0C3.5 9.8 8 14 8 14z"/><circle cx="8" cy="6.4" r="1.6"/></svg>Google Maps</span>
+        <span class="chip-name" data-i18n="mockName">Corner Café</span>
+        <span class="chip-btns"><i data-i18n="mockDir">Directions</i><i data-i18n="mockCall">Call</i><i class="hl" data-i18n="mockWeb">Website</i></span>
+      </div>
+      <div class="phone" role="img" aria-label="Example: a café's Vitrin website on a phone, with opening hours, menu prices, photos, and a map." data-i18n-aria="phoneAria">
+        <div class="screen" aria-hidden="true">
+          <div class="ph-bar ph-row">
+            <span class="ph-time">9:41</span>
+            <span class="ph-url"><svg class="ico" viewBox="0 0 16 16"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7"/></svg><span data-i18n="mockUrl">cornercafe.com</span></span>
+          </div>
+          <svg class="ph-awn"><rect width="100%" height="17" fill="url(#awnS)"/></svg>
+          <div class="ph-body">
+            <div class="ph-head ph-row">
+              <div class="ph-name" data-i18n="mockName">Corner Café</div>
+              <div class="ph-kind" data-i18n="mockKind">Coffee · Breakfast · Pastries</div>
+              <div class="ph-open"><span class="dot"></span><span data-i18n="mockOpen">Open now · until 7 pm</span></div>
+            </div>
+            <div class="ph-btns ph-row"><span class="on" data-i18n="mockDir">Directions</span><span data-i18n="mockCall">Call</span><span data-i18n="mockMenu">Menu</span></div>
+            <div class="ph-photos ph-row"><i class="p1"></i><i class="p2"></i><i class="p3"></i></div>
+            <div class="ph-menu ph-row">
+              <div class="ph-h" data-i18n="mockMenu">Menu</div>
+              <div class="ph-item"><span data-i18n="m1n">Flat white</span><i></i><b data-i18n="m1p">$5</b></div>
+              <div class="ph-item"><span data-i18n="m2n">Iced latte</span><i></i><b data-i18n="m2p">$6</b></div>
+              <div class="ph-item"><span data-i18n="m3n">Almond croissant</span><i></i><b data-i18n="m3p">$4</b></div>
+            </div>
+            <div class="ph-map ph-row"><div class="ph-mapimg"><span class="ph-pin"></span></div><span class="ph-addr" data-i18n="mockAddr">Central Ave, St. Pete · 4 min walk</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="chip c2" aria-hidden="true">
+        <span class="chip-src"><svg class="ico" viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="3.2"/><circle cx="8" cy="8" r="2.6"/><circle cx="11.2" cy="4.8" r=".5"/></svg>Instagram</span>
+        <span class="chip-name" data-i18n="mockHandle">@cornercafe</span>
+        <span class="chip-link"><svg class="ico" viewBox="0 0 16 16"><path d="M6.8 9.2a2.8 2.8 0 0 0 4 0l2-2a2.8 2.8 0 0 0-4-4l-.7.7"/><path d="M9.2 6.8a2.8 2.8 0 0 0-4 0l-2 2a2.8 2.8 0 0 0 4 4l.7-.7"/></svg><span data-i18n="mockUrl">cornercafe.com</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="get">
+  <div class="wrap">
+    <span class="hang-sign" data-i18n="sign1">What you get</span>
+    <h2 data-i18n="h2a">One website. Fully looked after.</h2>
+    <p class="lede" data-r data-i18n="ledeA">Everything a small business needs online, without hiring a web designer.</p>
+    <div class="cards">
+      <div class="card" data-r>
+        <span class="tag" data-i18n="tag1">Website</span>
+        <h3 data-i18n="card1h">A site that sells for you</h3>
+        <p data-i18n="card1p">Modern, fast, mobile-first. Your menu, prices, photos, and location — live in days, not months.</p>
+      </div>
+      <div class="card" data-r>
+        <span class="tag" data-i18n="tag2">Updates</span>
+        <h3 data-i18n="card2h">Change anything, anytime</h3>
+        <p data-i18n="card2p">New menu? Holiday hours? Send it over and it's live within 48 hours. Unlimited small updates included.</p>
+      </div>
+      <div class="card" data-r>
+        <span class="tag" data-i18n="tag3">Address</span>
+        <h3 data-i18n="card3h">Your own web address</h3>
+        <p data-i18n="card3p">A real address like yourcafe.com, with hosting included. No servers, no renewals, no tech headaches.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="wrap">
+    <span class="hang-sign" data-i18n="sign5">How it works</span>
+    <h2 data-i18n="h2e">Live in days, not months.</h2>
+    <p class="lede" data-r data-i18n="ledeE">Three steps, and you don't have to touch a line of code.</p>
+    <div class="how-progress" aria-hidden="true"><i></i></div>
+    <div class="steps">
+      <div class="step" data-r><div class="num">01</div><div><h3 data-i18n="s1h">Send us the basics</h3><p data-i18n="s1p">Your menu, prices, hours, and a few photos. A WhatsApp message is enough.</p></div></div>
+      <div class="step" data-r><div class="num">02</div><div><h3 data-i18n="s2h">We build your site</h3><p data-i18n="s2p">Designed for phones first and ready in days. You review it before anything goes live.</p></div></div>
+      <div class="step" data-r><div class="num">03</div><div><h3 data-i18n="s3h">Go live and get found</h3><p data-i18n="s3p">Your own web address, linked from your Google Maps listing and your Instagram bio.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="ba">
+  <div class="wrap">
+    <span class="hang-sign" data-i18n="sign2">Before / After</span>
+    <h2 data-i18n="h2b">What changes with Vitrin</h2>
+    <div class="strip">
+      <div class="pane before">
+        <span class="lbl" data-i18n="beforeLbl">Without Vitrin</span>
+        <ul>
+          <li><span class="t" data-i18n="b1">Customers can't find your hours or prices online</span></li>
+          <li><span class="t" data-i18n="b2">People call just to ask if you're open</span></li>
+          <li><span class="t" data-i18n="b3">No website, or one that breaks on phones</span></li>
+          <li><span class="t" data-i18n="b4">Regulars only. New customers walk past.</span></li>
+        </ul>
+      </div>
+      <div class="pane after">
+        <div class="shutter" aria-hidden="true"></div>
+        <span class="lbl" data-i18n="afterLbl">With Vitrin</span>
+        <ul>
+          <li><span class="t" data-i18n="a1">A clean site that shows up on Google</span></li>
+          <li><span class="t" data-i18n="a2">Hours, menu, and map all on one page</span></li>
+          <li><span class="t" data-i18n="a3">A professional link for Google Maps and Instagram</span></li>
+          <li><span class="t" data-i18n="a4">Up-to-date hours, menu, and prices — always</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing">
+  <div class="wrap">
+    <span class="hang-sign" data-i18n="sign3">Pricing</span>
+    <h2 data-i18n="h2c">Simple pricing. No monthly fees.</h2>
+    <p class="setup-line" data-r data-i18n="setupLine">Pay once to build · a small yearly fee keeps it running</p>
+    <div class="tags">
+      <div class="price-tag tag-build">
+        <span class="tag-string" aria-hidden="true"></span>
+        <span class="tag-kicker" data-i18n="tagBuild">The build</span>
+        <div class="amount"><span class="cur pre">$</span><span class="num" data-to="250">250</span><span class="cur post">$</span></div>
+        <span class="per" data-i18n="per">one-time · live in days</span>
+        <span class="lock" data-i18n="lock" data-i18n-full="lockFull">Founders: $150 — first 3 only</span>
+      </div>
+      <div class="price-tag tag-year">
+        <span class="tag-string" aria-hidden="true"></span>
+        <span class="tag-kicker" data-i18n="tagYear">Then, once a year</span>
+        <div class="amount"><span class="cur pre">$</span><span class="num" data-to="49">49</span><span class="cur post">$</span><span class="unit" data-i18n="perYear">/ year</span></div>
+        <ul class="tag-list">
+          <li data-i18n="inc1">Hosting</li>
+          <li data-i18n="inc2">Your own web address</li>
+          <li data-i18n="inc3">Unlimited small updates: menu, hours, prices, photos</li>
+        </ul>
+      </div>
+    </div>
+    <p class="price-includes" data-r data-i18n="includes">No monthly fees. Stop anytime.</p>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap faq-grid">
+    <div>
+      <span class="hang-sign" data-i18n="sign7">FAQ</span>
+      <h2 data-i18n="h2g">Fair questions, straight answers.</h2>
+      <p class="lede" data-r data-i18n="ledeG">What you're probably wondering, answered in a sentence or two.</p>
+    </div>
+    <div class="faq-list">
+      <details data-r><summary data-i18n="fq1">I already have Instagram. Do I really need a website?</summary><p class="a" data-i18n="fa1">Instagram is great for photos, but it's hard to find your hours, prices, or address there. Your site puts all of it on one clean page, shows up on Google, and gives your Maps listing and Instagram bio a link that looks professional.</p></details>
+      <details data-r><summary data-i18n="fq2">What does the $49 a year cover?</summary><p class="a" data-i18n="fa2">Hosting, your own web address, and unlimited small updates: menu, hours, prices, photos. Send us a message and we make the change.</p></details>
+      <details data-r><summary data-i18n="fq3">Are there any monthly fees?</summary><p class="a" data-i18n="fa3">No. You pay $250 once for the build, then $49 a year to keep it online. Stop anytime.</p></details>
+      <details data-r><summary data-i18n="fq4">How does the founding offer work?</summary><p class="a" data-i18n="fa4">The first 3 businesses get the full build for $150 instead of $250. In return, we ask for honest feedback and a short testimonial. We launch one week after all 3 founding spots are filled.</p></details>
+      <details data-r><summary data-i18n="fq5">Do I need to be good with technology?</summary><p class="a" data-i18n="fa5">Not at all. Send us your menu, hours, and a few photos; a WhatsApp message is enough. We do the rest, and you approve the site before it goes live.</p></details>
+      <details data-r><summary data-i18n="fq6">What happens after I join the waitlist?</summary><p class="a" data-i18n="fa6">We email you to confirm your spot and set up a quick chat about your business. There's nothing to pay today.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="window">
+    <div class="win-bg" aria-hidden="true"><svg class="awn w-awning"><rect width="100%" height="34" fill="url(#awnP)"/></svg></div>
+    <div class="wrap">
+      <span class="hang-sign" data-i18n="sign4" data-i18n-full="sign4Full">Founding spots: 3</span>
+      <h2 data-i18n="h2d">Put your business in the window.</h2>
+      <p class="final-sub" data-r data-i18n="finalSub" data-i18n-full="finalSubFull">The first 3 businesses get the full build for $150 instead of $250. Join the waitlist to claim one.</p>
+      <form class="signup" id="join2" data-r action="https://formspree.io/f/YOUR_FORM_ID" method="POST" data-source="final" data-msg="msg2" novalidate>
+        <label class="sr-only" for="email2" data-i18n="emailLabel">Email address</label>
+        <input type="email" id="email2" name="email" required autocomplete="email" inputmode="email" data-i18n-ph="placeholder" placeholder="you@yourbusiness.com" aria-describedby="msg2">
+        <input type="hidden" name="language" value="en">
+        <input type="hidden" name="source" value="final">
+        <div class="hp" aria-hidden="true"><input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></div>
+        <button class="btn" type="submit" data-i18n="btnFinal">Join the waitlist</button>
+      </form>
+      <p class="msg" id="msg2" role="status" aria-live="polite"></p>
+      <p class="trust" data-r data-i18n="trust">No payment now. We'll only email you about Vitrin.</p>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer data-r>
+    <span>&copy; 2026 Vitrin <span aria-hidden="true">·</span> <span class="loc">İzmir · Florida</span></span>
+    <span data-i18n="footer">Built for the shops that built your street.</span>
+  </footer>
+</div>
+
+<script>
+  /* ==========================================================
+     WAITLIST SETTINGS: the only part you need to edit
+     ========================================================== */
+  var VITRIN = {
+    /* Your Formspree form ID (formspree.io → your form → Integration).
+       The endpoint looks like https://formspree.io/f/abcdwxyz: paste "abcdwxyz" (the whole URL works too). */
+    formspreeId: 'YOUR_FORM_ID',
+    /* Founding spots already taken (0–3). Formspree can't be read from the page, so raise this when you
+       confirm a founder and redeploy. At 3 the page switches to "Founding spots filled — waitlist still open". */
+    spotsTaken: 0,
+    /* Optional: a URL that returns JSON like {"count": 2} for a live counter. Leave '' to skip. */
+    countUrl: ''
+  };
+  var SPOTS = 3;
+
+  var I18N = {
+    en: {
+      docTitle: "Vitrin — Websites for local businesses",
+      metaDesc: "Vitrin builds modern websites for cafés, salons, clinics, and local shops: hours, menu, prices, photos, and location in one place. $250 once, then $49 a year. No monthly fees.",
+      langLabel: "Language",
+      navCta: "Join the waitlist",
+      openSign: "Now taking founding clients",
+      openSignFull: "Founding spots filled — waitlist still open",
+      eyebrow: "// Your shop window, online",
+      h1a: "Your business is great.",
+      h1b: "Your online presence isn't.",
+      sub: "Customers find you on Google Maps and Instagram. Vitrin gives them a page worth landing on: your hours, menu, prices, photos, and location, all in one place. <strong>$250 once</strong>, then $49 a year. No monthly fees.",
+      emailLabel: "Email address",
+      placeholder: "you@yourbusiness.com",
+      btnHero: "Claim a founding spot",
+      btnHeroFull: "Join the waitlist",
+      formNote: "First 3 founding businesses get the full build for $150 instead of $250. In return: honest feedback and a testimonial.",
+      formNoteFull: "Founding spots are taken, but the waitlist is open. Launch pricing: $250 build, then $49/year.",
+      counterLbl: "founding spots filled",
+      launchRule: "We open <b>one week</b> after all 3 founding spots are filled.",
+      launchRuleFull: "<b>Opening within one week.</b> Join the waitlist now to get access at launch.",
+      marquee: "Cafés · Salons · Clinics · Bakeries · Barbers · Boutiques · Restaurants · Florists",
+      marquee2: "$250 build · $49 a year · No monthly fees · Unlimited small updates · Your own web address · Live in days",
+
+      sign6: "How customers find you",
+      h2f: "Found on Maps. Chosen on your site.",
+      ledeF: "Almost nobody browses the web to pick a café or a barber. They search Google Maps or scroll Instagram, then tap your link. Vitrin makes sure that tap lands on a page that looks as good as your shop.",
+      needLbl: "What they're looking for, in one place",
+      n1: "Hours", n2: "Menu", n3: "Prices", n4: "Photos", n5: "Location",
+      phoneAria: "Example: a café's Vitrin website on a phone, with opening hours, menu prices, photos, and a map.",
+      mockUrl: "cornercafe.com", mockHandle: "@cornercafe", mockName: "Corner Café",
+      mockKind: "Coffee · Breakfast · Pastries", mockOpen: "Open now · until 7 pm",
+      mockDir: "Directions", mockCall: "Call", mockMenu: "Menu", mockWeb: "Website",
+      m1n: "Flat white", m1p: "$5", m2n: "Iced latte", m2p: "$6", m3n: "Almond croissant", m3p: "$4",
+      mockAddr: "Central Ave, St. Pete · 4 min walk",
+
+      sign1: "What you get",
+      h2a: "One website. Fully looked after.",
+      ledeA: "Everything a small business needs online, without hiring a web designer.",
+      tag1: "Website", card1h: "A site that sells for you",
+      card1p: "Modern, fast, mobile-first. Your menu, prices, photos, and location — live in days, not months.",
+      tag2: "Updates", card2h: "Change anything, anytime",
+      card2p: "New menu? Holiday hours? Send it over and it's live within 48 hours. Unlimited small updates included.",
+      tag3: "Address", card3h: "Your own web address",
+      card3p: "A real address like yourcafe.com, with hosting included. No servers, no renewals, no tech headaches.",
+
+      sign5: "How it works",
+      h2e: "Live in days, not months.",
+      ledeE: "Three steps, and you don't have to touch a line of code.",
+      s1h: "Send us the basics",
+      s1p: "Your menu, prices, hours, and a few photos. A WhatsApp message is enough.",
+      s2h: "We build your site",
+      s2p: "Designed for phones first and ready in days. You review it before anything goes live.",
+      s3h: "Go live and get found",
+      s3p: "Your own web address, linked from your Google Maps listing and your Instagram bio.",
+
+      sign2: "Before / After", h2b: "What changes with Vitrin",
+      beforeLbl: "Without Vitrin", afterLbl: "With Vitrin",
+      b1: "Customers can't find your hours or prices online",
+      b2: "People call just to ask if you're open",
+      b3: "No website, or one that breaks on phones",
+      b4: "Regulars only. New customers walk past.",
+      a1: "A clean site that shows up on Google",
+      a2: "Hours, menu, and map all on one page",
+      a3: "A professional link for Google Maps and Instagram",
+      a4: "Up-to-date hours, menu, and prices — always",
+
+      sign3: "Pricing", h2c: "Simple pricing. No monthly fees.",
+      setupLine: "Pay once to build · a small yearly fee keeps it running",
+      tagBuild: "The build",
+      per: "one-time · live in days",
+      lock: "Founders: $150 — first 3 only",
+      lockFull: "Founding spots: all taken",
+      tagYear: "Then, once a year",
+      perYear: "/ year",
+      inc1: "Hosting",
+      inc2: "Your own web address",
+      inc3: "Unlimited small updates: menu, hours, prices, photos",
+      includes: "No monthly fees. Stop anytime.",
+
+      sign7: "FAQ",
+      h2g: "Fair questions, straight answers.",
+      ledeG: "What you're probably wondering, answered in a sentence or two.",
+      fq1: "I already have Instagram. Do I really need a website?",
+      fa1: "Instagram is great for photos, but it's hard to find your hours, prices, or address there. Your site puts all of it on one clean page, shows up on Google, and gives your Maps listing and Instagram bio a link that looks professional.",
+      fq2: "What does the $49 a year cover?",
+      fa2: "Hosting, your own web address, and unlimited small updates: menu, hours, prices, photos. Send us a message and we make the change.",
+      fq3: "Are there any monthly fees?",
+      fa3: "No. You pay $250 once for the build, then $49 a year to keep it online. Stop anytime.",
+      fq4: "How does the founding offer work?",
+      fa4: "The first 3 businesses get the full build for $150 instead of $250. In return, we ask for honest feedback and a short testimonial. We launch one week after all 3 founding spots are filled.",
+      fq5: "Do I need to be good with technology?",
+      fa5: "Not at all. Send us your menu, hours, and a few photos; a WhatsApp message is enough. We do the rest, and you approve the site before it goes live.",
+      fq6: "What happens after I join the waitlist?",
+      fa6: "We email you to confirm your spot and set up a quick chat about your business. There's nothing to pay today.",
+
+      sign4: "Founding spots: 3", sign4Full: "Waitlist open",
+      h2d: "Put your business in the window.",
+      finalSub: "The first 3 businesses get the full build for $150 instead of $250. Join the waitlist to claim one.",
+      finalSubFull: "Founding spots are taken, but the waitlist is open. We'll email you the moment we launch.",
+      btnFinal: "Join the waitlist",
+      trust: "No payment now. We'll only email you about Vitrin.",
+      footer: "Built for the shops that built your street.",
+
+      msgInvalid: "Please enter a valid email address.",
+      msgSending: "Saving your spot…",
+      msgDup: "You're already on the list — we'll be in touch.",
+      msgOk: "You're in. Watch your inbox.",
+      msgErr: "Couldn't save your spot — try again in a moment."
+    },
+    tr: {
+      docTitle: "Vitrin — Yerel işletmeler için web siteleri",
+      metaDesc: "Vitrin; kafe, kuaför, klinik ve mahalle dükkânları için modern web siteleri kurar: saatler, menü, fiyatlar, fotoğraflar ve konum tek yerde. Bir kere 250 $, sonra yılda 49 $. Aylık ücret yok.",
+      langLabel: "Dil",
+      navCta: "Listeye katıl",
+      openSign: "Kurucu müşteri kontenjanı açık",
+      openSignFull: "Kurucu kontenjanı doldu — bekleme listesi hâlâ açık",
+      eyebrow: "// Vitrininiz, artık internette",
+      h1a: "İşletmeniz harika.",
+      h1b: "İnternette öyle görünmüyor.",
+      sub: "Müşteriler sizi Google Haritalar'da ve Instagram'da buluyor. Vitrin, tıkladıklarında karşılarına derli toplu bir sayfa çıkarır: saatleriniz, menünüz, fiyatlarınız, fotoğraflarınız ve konumunuz, hepsi tek yerde. <strong>Bir kere 250 $</strong>, sonra yılda 49 $. Aylık ücret yok.",
+      emailLabel: "E-posta adresi",
+      placeholder: "siz@isletmeniz.com",
+      btnHero: "Kurucu yerimi ayır",
+      btnHeroFull: "Bekleme listesine katıl",
+      formNote: "İlk 3 kurucu işletmeye sitenin tamamı 250 $ yerine 150 $. Karşılığında: dürüst geri bildirim ve kısa bir müşteri yorumu.",
+      formNoteFull: "Kurucu yerler doldu ama bekleme listesi açık. Lansman fiyatı: 250 $ kurulum, sonra yılda 49 $.",
+      counterLbl: "kurucu yer dolu",
+      launchRule: "3 kurucu yerin hepsi dolduktan <b>bir hafta sonra</b> açılıyoruz.",
+      launchRuleFull: "<b>Bir hafta içinde açılıyoruz.</b> Açılışta yerinizi almak için listeye şimdi katılın.",
+      marquee: "Kafeler · Kuaförler · Klinikler · Fırınlar · Berberler · Butikler · Restoranlar · Çiçekçiler",
+      marquee2: "250 $ kurulum · Yılda 49 $ · Aylık ücret yok · Sınırsız küçük güncelleme · Kendi web adresiniz · Günler içinde yayında",
+
+      sign6: "Müşteriler sizi nasıl buluyor",
+      h2f: "Haritalar'da bulunur, sitenizde seçilirsiniz.",
+      ledeF: "Kafe ya da berber arayan kimse tek tek web sitelerine bakmıyor. Google Haritalar'da arıyor ya da Instagram'da sizi görüyor, sonra bağlantınıza dokunuyor. Vitrin, o dokunuşun dükkânınız kadar güzel bir sayfaya çıkmasını sağlar.",
+      needLbl: "Aradıkları her şey, tek yerde",
+      n1: "Saatler", n2: "Menü", n3: "Fiyatlar", n4: "Fotoğraflar", n5: "Konum",
+      phoneAria: "Örnek: telefonda bir kafenin Vitrin sitesi; çalışma saatleri, menü fiyatları, fotoğraflar ve harita.",
+      mockUrl: "kosekahve.com", mockHandle: "@kosekahve", mockName: "Köşe Kahve",
+      mockKind: "Kahve · Kahvaltı · Boyoz", mockOpen: "Şu an açık · 19:00'a kadar",
+      mockDir: "Yol tarifi", mockCall: "Ara", mockMenu: "Menü", mockWeb: "Web sitesi",
+      m1n: "Türk kahvesi", m1p: "120 ₺", m2n: "Soğuk latte", m2p: "165 ₺", m3n: "Boyoz", m3p: "40 ₺",
+      mockAddr: "Alsancak, Kordon · 4 dk yürüme",
+
+      sign1: "Neler alırsınız",
+      h2a: "Tek bir web sitesi. Bakımı bizden.",
+      ledeA: "Küçük bir işletmenin internette ihtiyaç duyduğu her şey, web tasarımcı tutmadan.",
+      tag1: "Web sitesi", card1h: "Sizin yerinize satan bir site",
+      card1p: "Modern, hızlı, önce telefona göre tasarlanmış. Menünüz, fiyatlarınız, fotoğraflarınız ve konumunuz; aylar değil, günler içinde yayında.",
+      tag2: "Güncellemeler", card2h: "İstediğiniz zaman değiştirin",
+      card2p: "Menü mü değişti? Bayramda saatler mi farklı? Bize gönderin, 48 saat içinde sitede. Sınırsız küçük güncelleme dahil.",
+      tag3: "Adres", card3h: "Size ait bir web adresi",
+      card3p: "isletmeniz.com gibi gerçek bir adres, barındırması dahil. Sunucu, yenileme, teknik dert yok.",
+
+      sign5: "Nasıl işliyor",
+      h2e: "Aylar değil, günler içinde yayında.",
+      ledeE: "Üç adım. Tek satır koda dokunmanıza gerek yok.",
+      s1h: "Temel bilgileri gönderin",
+      s1p: "Menünüz, fiyatlarınız, saatleriniz ve birkaç fotoğraf. Bir WhatsApp mesajı yeter.",
+      s2h: "Sitenizi biz kuralım",
+      s2p: "Önce telefona göre tasarlanır, günler içinde hazır olur. Yayına girmeden önce siz bakıp onaylarsınız.",
+      s3h: "Yayına çıkın, bulunun",
+      s3p: "Kendi web adresiniz; Google Haritalar kaydınızdan ve Instagram profilinizden bağlantılı.",
+
+      sign2: "Önce / Sonra", h2b: "Vitrin'le neler değişir",
+      beforeLbl: "Vitrin'siz", afterLbl: "Vitrin'le",
+      b1: "Müşteriler saatlerinizi ve fiyatlarınızı internette bulamıyor",
+      b2: "Telefon sırf “Açık mısınız?” diye çalıyor",
+      b3: "Ya site yok ya da telefonda dağılıyor",
+      b4: "Sadece müdavimler geliyor. Yeni müşteri önünden geçip gidiyor.",
+      a1: "Google'da çıkan, derli toplu bir site",
+      a2: "Saatler, menü ve harita tek sayfada",
+      a3: "Google Haritalar ve Instagram için profesyonel bir bağlantı",
+      a4: "Saatler, menü ve fiyatlar her zaman güncel",
+
+      sign3: "Fiyat", h2c: "Basit fiyat. Aylık ücret yok.",
+      setupLine: "Kurulum için bir kez ödersiniz · küçük bir yıllık ücretle yayında kalır",
+      tagBuild: "Kurulum",
+      per: "tek seferlik · günler içinde yayında",
+      lock: "Kuruculara 150 $ — sadece ilk 3",
+      lockFull: "Kurucu yerler doldu",
+      tagYear: "Sonra, yılda bir",
+      perYear: "/ yıl",
+      inc1: "Barındırma (hosting)",
+      inc2: "Kendi web adresiniz",
+      inc3: "Sınırsız küçük güncelleme: menü, saatler, fiyatlar, fotoğraflar",
+      includes: "Aylık ücret yok. İstediğiniz zaman bırakabilirsiniz.",
+
+      sign7: "Sık sorulanlar",
+      h2g: "Merak ettikleriniz, net cevaplar.",
+      ledeG: "Muhtemelen aklınızdan geçenler, bir iki cümleyle.",
+      fq1: "Zaten Instagram'ım var. Web sitesine gerçekten ihtiyacım var mı?",
+      fa1: "Instagram fotoğraf için harika ama orada saatlerinizi, fiyatlarınızı ya da adresinizi bulmak zor. Siteniz hepsini tek ve düzenli bir sayfada toplar, Google'da çıkar; Haritalar kaydınıza ve Instagram profilinize de profesyonel görünen bir bağlantı kazandırır.",
+      fq2: "Yıllık 49 $'a neler dahil?",
+      fa2: "Barındırma, kendi web adresiniz ve sınırsız küçük güncelleme: menü, saatler, fiyatlar, fotoğraflar. Bize bir mesaj atın, değişikliği biz yapalım.",
+      fq3: "Aylık ücret var mı?",
+      fa3: "Yok. Kurulum için bir kere 250 $ ödersiniz, sonra sitenin yayında kalması için yılda 49 $. İstediğiniz zaman bırakabilirsiniz.",
+      fq4: "Kurucu fırsatı nasıl işliyor?",
+      fa4: "İlk 3 işletme sitenin tamamını 250 $ yerine 150 $'a alır. Karşılığında dürüst geri bildiriminizi ve kısa bir müşteri yorumunuzu isteriz. 3 kurucu yerin hepsi dolduktan bir hafta sonra açılıyoruz.",
+      fq5: "Teknolojiden anlamam gerekiyor mu?",
+      fa5: "Hiç gerek yok. Menünüzü, saatlerinizi ve birkaç fotoğrafı göndermeniz yeter; bir WhatsApp mesajı bile olur. Gerisini biz hallederiz, site yayına girmeden önce siz onaylarsınız.",
+      fq6: "Listeye katıldıktan sonra ne oluyor?",
+      fa6: "Yerinizi onaylamak için size e-posta atarız ve işletmeniz hakkında kısa bir görüşme ayarlarız. Bugün hiçbir ödeme yok.",
+
+      sign4: "3 kurucu yer", sign4Full: "Bekleme listesi açık",
+      h2d: "İşletmenizi vitrine koyun.",
+      finalSub: "İlk 3 işletme sitenin tamamını 250 $ yerine 150 $'a alıyor. Yerinizi ayırmak için listeye katılın.",
+      finalSubFull: "Kurucu yerler doldu ama liste açık. Açıldığımız anda size e-posta atarız.",
+      btnFinal: "Bekleme listesine katıl",
+      trust: "Şimdi ödeme yok. Size sadece Vitrin'le ilgili e-posta atarız.",
+      footer: "Sokağınızı kuran dükkânlar için.",
+
+      msgInvalid: "Lütfen geçerli bir e-posta adresi yazın.",
+      msgSending: "Yeriniz kaydediliyor…",
+      msgDup: "Zaten listedesiniz, en kısa sürede size döneceğiz.",
+      msgOk: "Tamamdır, listedesiniz. E-postanıza göz atın.",
+      msgErr: "Yeriniz kaydedilemedi, birazdan tekrar deneyin."
+    },
+    es: {
+      docTitle: "Vitrin — Webs para negocios locales",
+      metaDesc: "Vitrin crea webs modernas para cafés, salones, clínicas y tiendas de barrio: horario, menú, precios, fotos y ubicación en un solo lugar. 250 $ una sola vez y luego 49 $ al año. Sin cuotas mensuales.",
+      langLabel: "Idioma",
+      navCta: "Únete a la lista",
+      openSign: "Aceptando clientes fundadores",
+      openSignFull: "Plazas fundadoras completas — la lista sigue abierta",
+      eyebrow: "// Tu escaparate, online",
+      h1a: "Tu negocio es genial.",
+      h1b: "Tu presencia online, no.",
+      sub: "Tus clientes te encuentran en Google Maps e Instagram. Vitrin les da una página que vale la pena: tu horario, menú, precios, fotos y ubicación, todo en un solo lugar. <strong>250 $ una sola vez</strong>, y luego 49 $ al año. Sin cuotas mensuales.",
+      emailLabel: "Correo electrónico",
+      placeholder: "tu@tunegocio.com",
+      btnHero: "Reservar mi plaza",
+      btnHeroFull: "Únete a la lista",
+      formNote: "Los 3 primeros negocios fundadores reciben la web completa por 150 $ en vez de 250 $. A cambio: tu opinión sincera y un testimonio.",
+      formNoteFull: "Las plazas fundadoras están ocupadas, pero la lista sigue abierta. Precio de lanzamiento: 250 $ la creación y luego 49 $ al año.",
+      counterLbl: "plazas fundadoras ocupadas",
+      launchRule: "Abrimos <b>una semana después</b> de que se llenen las 3 plazas fundadoras.",
+      launchRuleFull: "<b>Abrimos en una semana.</b> Únete a la lista ahora y entra desde el primer día.",
+      marquee: "Cafés · Salones · Clínicas · Panaderías · Barberías · Boutiques · Restaurantes · Floristerías",
+      marquee2: "250 $ la creación · 49 $ al año · Sin cuotas mensuales · Cambios pequeños ilimitados · Tu propia dirección web · Online en días",
+
+      sign6: "Cómo te encuentran",
+      h2f: "Te encuentran en Maps. Te eligen en tu web.",
+      ledeF: "Casi nadie busca un café o una barbería navegando por webs. Buscan en Google Maps o te ven en Instagram, y luego tocan tu enlace. Vitrin hace que ese toque lleve a una página tan cuidada como tu local.",
+      needLbl: "Lo que buscan, en un solo lugar",
+      n1: "Horario", n2: "Menú", n3: "Precios", n4: "Fotos", n5: "Ubicación",
+      phoneAria: "Ejemplo: la web Vitrin de un café en el móvil, con horario, precios del menú, fotos y mapa.",
+      mockUrl: "cafelaesquina.com", mockHandle: "@cafelaesquina", mockName: "Café La Esquina",
+      mockKind: "Café · Desayunos · Pastelitos", mockOpen: "Abierto ahora · hasta las 7 pm",
+      mockDir: "Cómo llegar", mockCall: "Llamar", mockMenu: "Menú", mockWeb: "Sitio web",
+      m1n: "Café con leche", m1p: "4 $", m2n: "Cortadito", m2p: "3 $", m3n: "Pastelito de guayaba", m3p: "2 $",
+      mockAddr: "Calle Ocho, Miami · a 4 min a pie",
+
+      sign1: "Qué obtienes",
+      h2a: "Una web. Y nosotros la cuidamos.",
+      ledeA: "Todo lo que un pequeño negocio necesita online, sin contratar a un diseñador web.",
+      tag1: "Sitio web", card1h: "Una web que vende por ti",
+      card1p: "Moderna, rápida y pensada para el móvil. Tu menú, precios, fotos y ubicación, online en días, no en meses.",
+      tag2: "Cambios", card2h: "Cambia lo que quieras, cuando quieras",
+      card2p: "¿Menú nuevo? ¿Horario de festivos? Mándanoslo y en 48 horas está online. Cambios pequeños ilimitados incluidos.",
+      tag3: "Dirección", card3h: "Tu propia dirección web",
+      card3p: "Una dirección de verdad, como tucafe.com, con el alojamiento incluido. Sin servidores, sin renovaciones, sin líos técnicos.",
+
+      sign5: "Cómo funciona",
+      h2e: "Online en días, no en meses.",
+      ledeE: "Tres pasos, y no tienes que tocar ni una línea de código.",
+      s1h: "Envíanos lo básico",
+      s1p: "Tu menú, precios, horario y unas fotos. Con un WhatsApp basta.",
+      s2h: "Creamos tu web",
+      s2p: "Pensada primero para el móvil y lista en días. La revisas antes de que se publique.",
+      s3h: "Publica y que te encuentren",
+      s3p: "Tu propia dirección web, enlazada desde tu ficha de Google Maps y tu bio de Instagram.",
+
+      sign2: "Antes / Después", h2b: "Qué cambia con Vitrin",
+      beforeLbl: "Sin Vitrin", afterLbl: "Con Vitrin",
+      b1: "Tus clientes no encuentran tu horario ni tus precios online",
+      b2: "Te llaman solo para preguntar si estás abierto",
+      b3: "No tienes web, o la que tienes falla en el móvil",
+      b4: "Solo vienen los de siempre. Los nuevos pasan de largo.",
+      a1: "Una web limpia que aparece en Google",
+      a2: "Horario, menú y mapa en una sola página",
+      a3: "Un enlace profesional para Google Maps e Instagram",
+      a4: "Horario, menú y precios siempre al día",
+
+      sign3: "Precio", h2c: "Precio simple. Sin cuotas mensuales.",
+      setupLine: "Pagas una vez la creación · una pequeña cuota anual la mantiene online",
+      tagBuild: "La creación",
+      per: "pago único · online en días",
+      lock: "Fundadores: 150 $ — solo los 3 primeros",
+      lockFull: "Plazas fundadoras: completas",
+      tagYear: "Después, una vez al año",
+      perYear: "/ año",
+      inc1: "Alojamiento",
+      inc2: "Tu propia dirección web",
+      inc3: "Cambios pequeños ilimitados: menú, horario, precios, fotos",
+      includes: "Sin cuotas mensuales. Déjalo cuando quieras.",
+
+      sign7: "Preguntas",
+      h2g: "Tus dudas, respuestas claras.",
+      ledeG: "Lo que seguramente te estás preguntando, en una o dos frases.",
+      fq1: "Ya tengo Instagram. ¿De verdad necesito una web?",
+      fa1: "Instagram es genial para fotos, pero ahí cuesta encontrar tu horario, tus precios o tu dirección. Tu web lo reúne todo en una página clara, aparece en Google y le da a tu ficha de Maps y a tu bio de Instagram un enlace con aspecto profesional.",
+      fq2: "¿Qué incluyen los 49 $ al año?",
+      fa2: "Alojamiento, tu propia dirección web y cambios pequeños ilimitados: menú, horario, precios, fotos. Nos mandas un mensaje y hacemos el cambio.",
+      fq3: "¿Hay cuotas mensuales?",
+      fa3: "No. Pagas 250 $ una sola vez por la creación y luego 49 $ al año para mantenerla online. Lo dejas cuando quieras.",
+      fq4: "¿Cómo funciona la oferta para fundadores?",
+      fa4: "Los 3 primeros negocios reciben la web completa por 150 $ en vez de 250 $. A cambio, te pedimos tu opinión sincera y un testimonio corto. Abrimos una semana después de que se llenen las 3 plazas fundadoras.",
+      fq5: "¿Tengo que saber de tecnología?",
+      fa5: "Para nada. Envíanos tu menú, tu horario y unas fotos; con un WhatsApp basta. Nosotros hacemos el resto y tú apruebas la web antes de publicarla.",
+      fq6: "¿Qué pasa después de apuntarme?",
+      fa6: "Te escribimos para confirmar tu plaza y organizar una charla rápida sobre tu negocio. Hoy no pagas nada.",
+
+      sign4: "3 plazas fundadoras", sign4Full: "Lista abierta",
+      h2d: "Pon tu negocio en el escaparate.",
+      finalSub: "Los 3 primeros negocios reciben la web completa por 150 $ en vez de 250 $. Únete a la lista y reserva la tuya.",
+      finalSubFull: "Las plazas fundadoras están ocupadas, pero la lista sigue abierta. Te escribimos en cuanto abramos.",
+      btnFinal: "Únete a la lista",
+      trust: "Hoy no pagas nada. Solo te escribiremos sobre Vitrin.",
+      footer: "Hecho para las tiendas que hicieron tu calle.",
+
+      msgInvalid: "Escribe un correo válido, por favor.",
+      msgSending: "Guardando tu plaza…",
+      msgDup: "Ya estás en la lista. Te escribiremos pronto.",
+      msgOk: "¡Listo, ya estás dentro! Revisa tu correo.",
+      msgErr: "No pudimos guardar tu plaza. Inténtalo de nuevo en un momento."
+    }
+  };
+
+  var currentLang = 'en';
+  var LANG_NAMES = {en:'English', tr:'Türkçe', es:'Español'};
+  function each(q, fn){ Array.prototype.forEach.call(document.querySelectorAll(q), fn); }
+
+  /* ---------- waitlist storage: Formspree for the signup, this browser for duplicates ---------- */
+  var Waitlist = (function(){
+    var KEY = 'vitrin-waitlist', mem = [];
+    function read(){
+      try{ var v = JSON.parse(localStorage.getItem(KEY) || '[]'); return Array.isArray(v) ? v : []; }
+      catch(e){ return mem; }
+    }
+    function write(list){ mem = list; try{ localStorage.setItem(KEY, JSON.stringify(list)); }catch(e){} }
+    function endpoint(){
+      var id = String(VITRIN.formspreeId || '').trim().replace(/^.*\/f\//, '').replace(/[/?#].*$/, '');
+      return /^[A-Za-z0-9]+$/.test(id) ? 'https://formspree.io/f/' + id : '';
+    }
+    return {
+      endpoint: endpoint,
+      has: function(email){ return read().some(function(r){ return r.email === email; }); },
+      add: function(rec){ var list = read(); list.push(rec); write(list); },
+      /* spots this visitor has seen filled, counting their own signup */
+      localFilled: function(){
+        return read().reduce(function(n, r){ return typeof r.base === 'number' ? Math.max(n, r.base + 1) : n; }, 0);
+      },
+      send: function(payload){
+        var url = endpoint();
+        if(!url){
+          if(window.console) console.warn('[Vitrin] Set VITRIN.formspreeId to your Formspree form ID. Signups are not being sent anywhere yet.');
+          return Promise.reject({code:'config'});
+        }
+        var ctrl = window.AbortController ? new AbortController() : null;
+        var timer = ctrl ? setTimeout(function(){ ctrl.abort(); }, 15000) : 0;
+        return fetch(url, {
+          method:'POST',
+          headers:{'Accept':'application/json', 'Content-Type':'application/json'},
+          body:JSON.stringify(payload),
+          signal:ctrl ? ctrl.signal : undefined
+        }).then(function(res){
+          clearTimeout(timer);
+          if(res.ok) return true;
+          return res.json().catch(function(){ return {}; }).then(function(body){
+            var errs = (body && body.errors) || [];
+            var badEmail = errs.some(function(e){ return e.field === 'email' || /EMAIL/.test(e.code || ''); });
+            throw {code: badEmail ? 'email' : 'server', status: res.status, errors: errs};
+          });
+        }, function(err){ clearTimeout(timer); throw {code:'network', error:err}; });
+      }
+    };
+  })();
+
+  var remoteCount = 0;
+  function spotsFilled(){
+    return Math.min(SPOTS, Math.max(0, parseInt(VITRIN.spotsTaken, 10) || 0, remoteCount, Waitlist.localFilled()));
+  }
+
+  /* ---------- render: language + founding-spots state ---------- */
+  function render(){
+    var dict = I18N[currentLang], root = document.documentElement;
+    var filled = spotsFilled(), full = filled >= SPOTS, changed = [];
+    root.lang = currentLang;
+    root.classList.toggle('is-full', full);
+    function key(el, attr){ return (full && el.getAttribute('data-i18n-full')) || el.getAttribute(attr); }
+    function put(el, v, how){
+      if(v == null || el.__v === v) return;
+      el.__v = v;
+      if(how === 'html') el.innerHTML = v;
+      else if(how === 'ph') el.placeholder = v;
+      else if(how === 'aria') el.setAttribute('aria-label', v);
+      else el.textContent = v;
+      if(!how || how === 'html') changed.push(el);
+    }
+    each('[data-i18n]', function(el){ put(el, dict[key(el, 'data-i18n')]); });
+    each('[data-i18n-html]', function(el){ put(el, dict[key(el, 'data-i18n-html')], 'html'); });
+    each('[data-i18n-ph]', function(el){ put(el, dict[el.getAttribute('data-i18n-ph')], 'ph'); });
+    each('[data-i18n-aria]', function(el){ put(el, dict[el.getAttribute('data-i18n-aria')], 'aria'); });
+    document.title = dict.docTitle;
+    var meta = document.querySelector('meta[name="description"]'); if(meta) meta.setAttribute('content', dict.metaDesc);
+    each('input[name="language"]', function(el){ el.value = currentLang; });
+    each('.lang button', function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === currentLang)); });
+    document.getElementById('count').textContent = String(filled).padStart(2, '0');
+    each('.pips i', function(p, i){ p.classList.toggle('on', i < filled); });
+    if(changed.length && window.__motionText) window.__motionText(changed);
+  }
+
+  function setLang(lang, remember){
+    if(!I18N[lang]) return;
+    currentLang = lang;
+    if(remember){ try{ localStorage.setItem('vitrin-lang', lang); }catch(e){} }
+    render();
+  }
+  each('.lang button', function(b){
+    b.addEventListener('click', function(){ setLang(b.getAttribute('data-lang'), true); });
+  });
+
+  /* ?lang=tr link → saved choice → browser language → English */
+  function pickLang(){
+    var q = /[?&]lang=(en|tr|es)\b/i.exec(location.search);
+    if(q) return q[1].toLowerCase();
+    try{ var saved = localStorage.getItem('vitrin-lang'); if(I18N[saved]) return saved; }catch(e){}
+    var prefs = navigator.languages || [navigator.language || 'en'];
+    for(var i = 0; i < prefs.length; i++){
+      var c = String(prefs[i] || '').slice(0, 2).toLowerCase();
+      if(I18N[c]) return c;
+    }
+    return 'en';
+  }
+  currentLang = pickLang();
+  render();
+
+  if(VITRIN.countUrl && window.fetch){
+    fetch(VITRIN.countUrl, {cache:'no-store'}).then(function(r){ return r.ok ? r.json() : null; }).then(function(j){
+      var n = typeof j === 'number' ? j : j && (j.count != null ? j.count : j.spotsTaken);
+      n = parseInt(n, 10);
+      if(isFinite(n)){ remoteCount = n; render(); }
+    }).catch(function(){});
+  }
+
+  /* ---------- waitlist forms ---------- */
+  function validEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }
+  function setMsg(el, k, cls){
+    el.className = 'msg' + (cls ? ' ' + cls : '');
+    if(!k){ el.removeAttribute('data-i18n'); el.__v = ''; el.textContent = ''; return; }
+    el.setAttribute('data-i18n', k);
+    el.__v = I18N[currentLang][k];
+    el.textContent = el.__v;
+    if(window.__motionText) window.__motionText([el]);
+  }
+  function setBusy(on){
+    each('form.signup', function(f){ f.setAttribute('aria-busy', String(on)); });
+    each('form.signup .btn', function(b){ b.disabled = on; });
+  }
+
+  function join(e){
+    e.preventDefault();
+    var form = e.currentTarget, input = form.querySelector('input[type="email"]');
+    var msg = document.getElementById(form.getAttribute('data-msg'));
+    var email = input.value.trim().toLowerCase();
+    input.removeAttribute('aria-invalid');
+    if(!validEmail(email)){ input.setAttribute('aria-invalid', 'true'); setMsg(msg, 'msgInvalid', 'err'); input.focus(); return; }
+    if(Waitlist.has(email)){ setMsg(msg, 'msgDup', 'ok'); return; }
+    if(form.querySelector('[name="_gotcha"]').value){ setMsg(msg, 'msgOk', 'ok'); input.value = ''; return; }   // bot
+
+    var base = spotsFilled(), tz = '';
+    try{ tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }catch(err){}
+    setBusy(true);
+    setMsg(msg, 'msgSending', '');
+    Waitlist.send({
+      email: email,
+      language: currentLang,                 /* which language they signed up in */
+      language_name: LANG_NAMES[currentLang],
+      source: form.getAttribute('data-source'),
+      founding_spots_shown: base + '/' + SPOTS,
+      founding_offer: base < SPOTS ? 'open' : 'full',
+      timezone: tz,
+      page: location.href,
+      referrer: document.referrer || '',
+      joined_at: new Date().toISOString(),
+      _subject: 'Vitrin waitlist: ' + email + ' (' + currentLang.toUpperCase() + ')'
+    }).then(function(){
+      Waitlist.add({email: email, lang: currentLang, base: base, joined: new Date().toISOString()});
+      input.value = '';
+      setMsg(msg, 'msgOk', 'ok');
+      render();
+    }, function(err){
+      if(err && err.code === 'email'){ input.setAttribute('aria-invalid', 'true'); setMsg(msg, 'msgInvalid', 'err'); }
+      else setMsg(msg, 'msgErr', 'err');
+    }).then(function(){ setBusy(false); });
+  }
+  each('form.signup', function(form){
+    var ep = Waitlist.endpoint(); if(ep) form.action = ep;
+    form.addEventListener('submit', join);
+  });
+
+  /* "Join the waitlist" in the top bar goes to the closest of the two forms */
+  each('a[href="#join"]', function(a){
+    a.addEventListener('click', function(e){
+      var forms = document.querySelectorAll('form.signup'), vh = window.innerHeight, best = null, bestD = Infinity;
+      Array.prototype.forEach.call(forms, function(f){
+        var r = f.getBoundingClientRect(), dd = Math.abs(r.top + r.height / 2 - vh / 2);
+        if(dd < bestD){ bestD = dd; best = f; }
+      });
+      if(!best) return;
+      e.preventDefault();
+      var input = best.querySelector('input[type="email"]'), r = best.getBoundingClientRect();
+      var focus = function(){ input.focus({preventScroll:true}); };
+      if(r.top > 90 && r.bottom < vh - 40) return focus();
+      var y = window.pageYOffset + r.top - vh * .38;
+      if(window.__lenis) window.__lenis.scrollTo(y, {duration:1.2, onComplete:focus});
+      else{
+        var instant = !document.documentElement.classList.contains('mo');
+        window.scrollTo({top:y, behavior: instant ? 'auto' : 'smooth'});
+        setTimeout(focus, instant ? 0 : 800);
+      }
+    });
+  });
+  each('a[href="#top"]', function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      if(window.__lenis) window.__lenis.scrollTo(0, {duration:1.2});
+      else window.scrollTo({top:0, behavior: document.documentElement.classList.contains('mo') ? 'smooth' : 'auto'});
+    });
+  });
+</script>
+<script>
+/* ==========================================================
+   Vitrin motion — GSAP + ScrollTrigger (+ Lenis smooth scroll)
+   One clock (gsap.ticker) drives the scroll and every animation.
+   Only transform and opacity animate; layout is measured once,
+   then again on refresh — never inside a scroll or frame loop.
+   ========================================================== */
+(function(){
+  var root = document.documentElement;
+  if(!root.classList.contains('mo')) return;          // "reduce motion" visitors get the static page
+
+  var started = false;
+  function go(){
+    if(started) return; started = true;
+    try{ init(); }catch(err){ if(window.console) console.error(err); bail(); }
+  }
+  window.__moGo = go;
+  if(window.__moReady) go();
+
+  /* anything goes wrong → put the page back to its static, fully visible state */
+  function bail(){
+    try{
+      if(window.ScrollTrigger) window.ScrollTrigger.getAll().forEach(function(t){ t.kill(true); });
+      if(window.gsap) window.gsap.globalTimeline.clear();
+      if(window.__lenis){ window.__lenis.destroy(); window.__lenis = null; }
+    }catch(e){}
+    window.__motionText = null;
+    Array.prototype.forEach.call(document.querySelectorAll('body [style]'), function(el){ el.removeAttribute('style'); });
+    if(window.__moOff) window.__moOff();
+  }
+
+  function init(){
+    if(!root.classList.contains('mo')) return;        // the failsafe already showed the static page
+    var gsap = window.gsap, ScrollTrigger = window.ScrollTrigger;
+    if(!gsap || !ScrollTrigger){ bail(); return; }
+    clearTimeout(window.__moFail);
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ignoreMobileResize:true, autoRefreshEvents:'visibilitychange,resize'});
+    root.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+
+    var $ = function(q, c){ return Array.prototype.slice.call((c || document).querySelectorAll(q)); };
+    var E = 'expo.out';
+    var mm = gsap.matchMedia();
+    var fine = window.matchMedia('(pointer:fine)').matches;
+    gsap.ticker.lagSmoothing(0);
+
+    /* ---------- smooth scroll, driven by the same clock as the animations ---------- */
+    var lenis = null;
+    if(window.Lenis && fine){
+      lenis = new window.Lenis({lerp:0.11, smoothWheel:true, syncTouch:false, wheelMultiplier:1, autoRaf:false});
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add(function(t){ lenis.raf(t * 1000); });
+      lenis.stop();                                     // no scrolling under the preloader
+      window.__lenis = lenis;
+    }
+    var SCRUB = lenis ? 0.6 : 0.8;                      // scenes glide; Lenis already smooths the wheel
+    var SCRUB_SOFT = lenis ? 0.4 : 0.6;                 // light parallax: close to the finger, never floaty
+
+    /* ---------- refreshes: after fonts load and text changes, but never mid-intro ---------- */
+    var introBusy = false, refreshLater = false, refreshT;
+    function refreshNow(){ if(introBusy){ refreshLater = true; return; } ScrollTrigger.refresh(); }
+    function refreshSoon(ms){ clearTimeout(refreshT); refreshT = setTimeout(refreshNow, ms == null ? 150 : ms); }
+
+    /* ---------- split headlines into masked words ---------- */
+    function splitEl(el){
+      if(el.querySelector('.w')) return;
+      var parts = el.textContent.trim().split(/[ \t\r\n]+/);   // keeps non-breaking spaces inside words
+      el.textContent = '';
+      parts.forEach(function(w, i){
+        var o = document.createElement('span'); o.className = 'w';
+        var n = document.createElement('i'); n.textContent = w;
+        o.appendChild(n); el.appendChild(o);
+        if(i < parts.length - 1) el.appendChild(document.createTextNode(' '));
+      });
+    }
+    var h1 = document.querySelector('header h1');
+    h1.classList.add('split');
+    $('section h2').forEach(function(h){ h.classList.add('split'); });
+    function splitAll(){
+      $('[data-i18n]', h1).forEach(splitEl);
+      $('section h2').forEach(splitEl);
+    }
+    splitAll();
+    function words(el){ return $('.w > i', el); }
+
+    /* ---------- reusable reveals: one easing family, short wave-like staggers ---------- */
+    function revealWords(el, delay){
+      el.classList.add('is-in');
+      return gsap.fromTo(words(el), {y:0, yPercent:118, rotate:4, transformOrigin:'0% 0%'},
+        {y:0, yPercent:0, rotate:0, duration:1, ease:E, stagger:0.045, delay:delay || 0});
+    }
+    function fadeUp(els, o){
+      o = o || {};
+      els = [].concat(els).filter(Boolean);
+      els.forEach(function(e){ e.classList.add('is-in'); });
+      return gsap.fromTo(els, {opacity:0, y:o.y == null ? 28 : o.y},
+        {opacity:1, y:0, duration:o.d || 0.9, ease:E, stagger:o.s == null ? 0.06 : o.s, delay:o.delay || 0});
+    }
+    function swing(el, delay){
+      el.classList.add('is-in');
+      gsap.fromTo(el, {rotation:-12, y:-8}, {rotation:0, y:0, duration:1.3, ease:'elastic.out(1,0.45)', delay:delay || 0, transformOrigin:'50% -10px'});
+      gsap.fromTo(el, {opacity:0}, {opacity:1, duration:0.3, ease:'power2.out', delay:delay || 0});
+    }
+
+    /* reveals wait for the shutter: anything already on screen plays once the page opens */
+    var pageOpen = false, queued = [];
+    function onEnter(trigger, fn, start){
+      if(!trigger) return;
+      ScrollTrigger.create({trigger:trigger, start:start || 'top 86%', once:true,
+        onEnter:function(){ if(pageOpen) fn(); else queued.push(fn); }});
+    }
+    /* will-change only while a scene is on screen */
+    function layerWhileActive(els){
+      return function(self){ els.forEach(function(el){ el.style.willChange = self.isActive ? 'transform' : ''; }); };
+    }
+
+    /* ================= PRELOADER → HERO ================= */
+    var pre = document.getElementById('preloader');
+    var topbar = document.getElementById('topbar');
+    var ghost = document.getElementById('ghost');
+    var heroFirst = $('header .open-sign, header .eyebrow');
+    var heroRest = $('header [data-r]').filter(function(el){ return heroFirst.indexOf(el) < 0; });
+
+    var hero = gsap.timeline({paused:true, defaults:{ease:E},
+      onComplete:function(){ introBusy = false; if(refreshLater){ refreshLater = false; ScrollTrigger.refresh(); } }});
+    hero.fromTo(topbar, {y:0, yPercent:-100}, {y:0, yPercent:0, duration:0.9}, 0)
+        .fromTo(ghost, {opacity:0, scale:0.94}, {opacity:1, scale:1, duration:1.4}, 0)
+        .fromTo(heroFirst, {opacity:0, y:22}, {opacity:1, y:0, duration:0.9, stagger:0.06}, 0)
+        .fromTo(words(h1), {y:0, yPercent:118, rotate:4, transformOrigin:'0% 0%'}, {y:0, yPercent:0, rotate:0, duration:1, stagger:0.05}, 0.08)
+        .fromTo(heroRest, {opacity:0, y:26}, {opacity:1, y:0, duration:0.9, stagger:0.06}, 0.3);
+    h1.classList.add('is-in');
+    heroFirst.concat(heroRest).forEach(function(e){ e.classList.add('is-in'); });
+
+    function openPage(){
+      if(lenis) lenis.start();
+      pageOpen = true;
+      hero.play();
+      queued.splice(0).forEach(function(fn, i){ gsap.delayedCall(0.3 + i * 0.05, fn); });
+    }
+
+    /* hero drifts away as you scroll */
+    gsap.to(ghost, {xPercent:-16, yPercent:-14, ease:'none',
+      scrollTrigger:{trigger:'header', start:'top top', end:'bottom top', scrub:SCRUB_SOFT, onToggle:layerWhileActive([ghost])}});
+    gsap.to('header .wrap', {y:-80, opacity:0.2, ease:'none',
+      scrollTrigger:{trigger:'header', start:'top top', end:'bottom top', scrub:SCRUB_SOFT}});
+
+    /* ================= MARQUEES (velocity-reactive) ================= */
+    var mqs = $('.mq').map(function(mq, i){
+      var track = mq.querySelector('.mq-track'), first = track.children[0];
+      var w = first.getBoundingClientRect().width || 600;                 // measured once
+      var need = Math.max(4, Math.ceil(2 * Math.max(window.screen.width || 0, window.innerWidth) / w) + 1);
+      while(track.children.length < need) track.appendChild(first.cloneNode(true));
+      var n = track.children.length, rev = i % 2 === 1, shift = -100 / n;   // one copy = one seamless loop
+      var tw = gsap.fromTo(track, {xPercent: rev ? shift : 0}, {xPercent: rev ? 0 : shift, duration: rev ? 34 : 26, ease:'none', repeat:-1});
+      tw.totalTime(tw.duration() * 200);                                  // room to run backwards
+      var st = ScrollTrigger.create({trigger:mq, start:'top bottom', end:'bottom top',
+        onToggle:function(self){ if(self.isActive) tw.resume(); else tw.pause(); }});
+      return {tw:tw, st:st};
+    });
+    var tracks = $('.mq-track'), setSkew = gsap.quickSetter(tracks, 'skewX', 'deg');
+    var vel = 0, velAt = 0, dir = 1, speed = 1, skew = 0, skewShown = 0;
+    gsap.ticker.add(function(time, dt){
+      if(time - velAt > 0.12) vel = 0;                                    // scrolling stopped
+      var k = 1 - Math.pow(0.9, (dt || 16.7) / 16.7);                     // same feel at 60 and 120 fps
+      var target = dir * (1 + Math.min(Math.abs(vel) / 280, 5));
+      speed += (target - speed) * k;
+      skew += (gsap.utils.clamp(-6, 6, vel / -380) - skew) * k;
+      for(var i = 0; i < mqs.length; i++) mqs[i].tw.timeScale(speed);
+      if(Math.abs(skew - skewShown) > 0.02){ skewShown = skew; setSkew(skew); }
+    });
+
+    /* ================= SECTIONS (in page order) ================= */
+    $('section').forEach(function(sec){
+      if(!sec.classList.contains('final')){
+        var line = document.createElement('i'); line.className = 'sec-line'; line.setAttribute('aria-hidden', 'true');
+        sec.insertBefore(line, sec.firstChild);
+        onEnter(sec, function(){ gsap.fromTo(line, {scaleX:0}, {scaleX:1, duration:1.2, ease:'expo.inOut'}); }, 'top 94%');
+      }
+      var sign = sec.querySelector('.hang-sign'), h2 = sec.querySelector('h2'), lede = sec.querySelector('.lede');
+      if(sign) onEnter(sign, function(){ swing(sign); });
+      if(h2) onEnter(h2, function(){ revealWords(h2, 0.06); });
+      if(lede) onEnter(lede, function(){ fadeUp(lede, {delay:0.18}); });
+
+      /* -- how customers find you: the phone rises, the page builds itself inside it -- */
+      if(sec.classList.contains('found')){
+        var stage = sec.querySelector('.phone-stage'), phone = sec.querySelector('.phone');
+        var needs = $('.needs-lbl, .needs li', sec), chips = $('.chip', sec);
+        onEnter(needs[0], function(){ fadeUp(needs, {y:18, s:0.05, delay:0.25}); }, 'top 90%');
+        onEnter(phone, function(){
+          phone.classList.add('is-in');
+          gsap.fromTo(phone, {opacity:0, y:80, rotate:4}, {opacity:1, y:0, rotate:0, duration:1.2, ease:E});
+          gsap.fromTo($('.ph-row', phone), {opacity:0, y:16}, {opacity:1, y:0, duration:0.8, ease:E, stagger:0.06, delay:0.25});
+          chips.forEach(function(c, i){
+            c.classList.add('is-in');
+            gsap.fromTo(c, {opacity:0, x: i ? 34 : -34, y:12}, {opacity:1, x:0, y:0, duration:1, ease:E, delay:0.55 + i * 0.14});
+          });
+        }, 'top 82%');
+        gsap.fromTo(stage, {y:function(){ return window.innerWidth < 900 ? 24 : 50; }}, {y:function(){ return window.innerWidth < 900 ? -24 : -50; }, ease:'none',
+          scrollTrigger:{trigger:sec, start:'top bottom', end:'bottom top', scrub:SCRUB_SOFT, invalidateOnRefresh:true}});
+      }
+
+      /* -- what you get: cards tilt up into place -- */
+      $('.cards', sec).forEach(function(g){
+        var cards = $('.card', g);
+        onEnter(g, function(){
+          cards.forEach(function(c){ c.classList.add('is-in'); });
+          gsap.fromTo(cards, {opacity:0, y:70, rotationX:-14, transformPerspective:900, transformOrigin:'50% 100%'},
+            {opacity:1, y:0, rotationX:0, duration:1.1, ease:E, stagger:0.08});
+        }, 'top 84%');
+      });
+
+      /* -- how it works -- */
+      if(sec.classList.contains('how')){
+        var track = sec.querySelector('.steps'), steps = $('.step', sec), wrap = track.parentElement;
+        mm.add('(min-width: 900px)', function(){
+          var pad = parseFloat(window.getComputedStyle(wrap).paddingLeft) || 24;
+          function dist(){                                                  // only runs on refresh
+            var left = wrap.getBoundingClientRect().left + pad;
+            return Math.max(0, track.scrollWidth - (window.innerWidth - left) + pad);
+          }
+          var tl = gsap.timeline({defaults:{ease:'none'}});
+          tl.fromTo(track, {x:0}, {x:function(){ return -dist(); }}, 0)
+            .fromTo(sec.querySelector('.how-progress i'), {scaleX:0}, {scaleX:1}, 0);
+          ScrollTrigger.create({trigger:sec, start:'top top', end:function(){ return '+=' + (dist() + window.innerHeight * 0.25); },
+            pin:true, scrub:SCRUB, animation:tl, invalidateOnRefresh:true, anticipatePin:1, onToggle:layerWhileActive([track])});
+          steps.forEach(function(st, i){
+            var num = st.querySelector('.num');
+            if(i > 0){
+              st.classList.add('is-in');
+              gsap.fromTo(st, {scale:0.88, opacity:0.35, rotate:2.5}, {scale:1, opacity:1, rotate:0, ease:'none',
+                scrollTrigger:{trigger:st, containerAnimation:tl, start:'left 98%', end:'left 55%', scrub:true}});
+            }
+            gsap.fromTo(num, {x:90}, {x:0, ease:'none',
+              scrollTrigger:{trigger:st, containerAnimation:tl, start:'left 100%', end:'left 30%', scrub:true}});
+          });
+          onEnter(sec, function(){ fadeUp(steps[0], {y:50, delay:0.2}); }, 'top 80%');
+        });
+        mm.add('(max-width: 899px)', function(){
+          steps.forEach(function(st){ onEnter(st, function(){ fadeUp(st, {y:50}); }, 'top 88%'); });
+        });
+      }
+
+      /* -- before / after: cross out the old, roll up the shutter on the new -- */
+      if(sec.classList.contains('ba')){
+        var beforeLis = $('.pane.before li', sec), afterLis = $('.pane.after li', sec), shutter = sec.querySelector('.shutter');
+        /* one strike segment per line of text, measured on refresh (font load, resize, language change) */
+        beforeLis.forEach(function(li){
+          li.__segs = [0, 1, 2].map(function(){
+            var s = document.createElement('i'); s.className = 'strike'; s.setAttribute('aria-hidden', 'true');
+            li.appendChild(s); return s;
+          });
+        });
+        var layoutStrikes = function(){
+          beforeLis.forEach(function(li){
+            var t = li.querySelector('.t'), lr = li.getBoundingClientRect(), range = document.createRange();
+            range.selectNodeContents(t);
+            var lines = [];
+            Array.prototype.forEach.call(range.getClientRects(), function(r){
+              if(r.width < 2) return;
+              var last = lines[lines.length - 1];
+              if(last && Math.abs(last.top - r.top) < 4){ last.right = Math.max(last.right, r.right); last.left = Math.min(last.left, r.left); }
+              else lines.push({top:r.top, left:r.left, right:r.right, h:r.height});
+            });
+            li.__segs.forEach(function(s, i){
+              var ln = lines[i];
+              s.style.width = ln ? (ln.right - ln.left) + 'px' : '0px';
+              if(ln){ s.style.left = (ln.left - lr.left) + 'px'; s.style.top = (ln.top - lr.top + ln.h * 0.56) + 'px'; }
+            });
+          });
+        };
+        layoutStrikes();
+        ScrollTrigger.addEventListener('refreshInit', layoutStrikes);
+        var buildBA = function(){
+          var tl = gsap.timeline({defaults:{ease:'none'}});
+          beforeLis.forEach(function(li, i){
+            tl.fromTo(li.__segs, {scaleX:0}, {scaleX:1, duration:0.3, stagger:0.3, ease:'power1.inOut'}, i * 0.2)
+              .fromTo(li.querySelector('.t'), {opacity:1}, {opacity:0.45, duration:0.4}, i * 0.2 + 0.1);
+          });
+          tl.to(shutter, {yPercent:-101, duration:1.2, ease:'power2.inOut'}, 1)
+            .fromTo(afterLis, {opacity:0, x:-18}, {opacity:1, x:0, stagger:0.14, duration:0.45}, 1.65);
+          return tl;
+        };
+        mm.add('(min-width: 900px) and (min-height: 620px)', function(){
+          ScrollTrigger.create({trigger:sec, start:'top top', end:'+=120%', pin:true, scrub:SCRUB, animation:buildBA(),
+            anticipatePin:1, onToggle:layerWhileActive([shutter])});
+        });
+        mm.add('(max-width: 899px), (max-height: 619px)', function(){
+          ScrollTrigger.create({trigger:sec.querySelector('.strip'), start:'top 78%', end:'bottom 40%', scrub:SCRUB, animation:buildBA(),
+            onToggle:layerWhileActive([shutter])});
+        });
+      }
+
+      /* -- pricing: the tags swing on their strings and the prices count up -- */
+      if(sec.classList.contains('pricing')){
+        onEnter(sec.querySelector('.setup-line'), function(){ fadeUp(sec.querySelector('.setup-line'), {delay:0.12}); });
+        $('.price-tag', sec).forEach(function(tag, i){
+          var str = tag.querySelector('.tag-string'), num = tag.querySelector('.num');
+          var to = parseInt(num.getAttribute('data-to'), 10) || 0, node = num.firstChild;
+          var hang = -((str ? str.offsetHeight : 48) + 9);                  // pivot at the top of the string
+          onEnter(tag, function(){
+            var d = i * 0.14, o = {v:0}, last = -1;
+            tag.classList.add('is-in');
+            node.nodeValue = '0';
+            gsap.fromTo(tag, {rotation: i ? 16 : -20, y:-36}, {rotation:0, y:0, duration:1.8, ease:'elastic.out(1,0.32)', delay:d, transformOrigin:'50% ' + hang + 'px'});
+            gsap.fromTo(tag, {opacity:0}, {opacity:1, duration:0.35, ease:'power2.out', delay:d});
+            gsap.to(o, {v:to, duration:1.6, ease:E, delay:d + 0.1, onUpdate:function(){
+              var r = Math.round(o.v); if(r !== last){ last = r; node.nodeValue = r; }      // text only changes when the digit does
+            }});
+            var lock = tag.querySelector('.lock');
+            if(lock) gsap.fromTo(lock, {opacity:0, scale:0.6, rotation:-8}, {opacity:1, scale:1, rotation:0, duration:0.8, ease:E, delay:d + 0.55});
+          }, 'top 88%');
+        });
+        onEnter(sec.querySelector('.price-includes'), function(){ fadeUp(sec.querySelector('.price-includes'), {delay:0.25}); }, 'top 94%');
+      }
+
+      /* -- questions -- */
+      if(sec.classList.contains('faq')){
+        var items = $('details', sec);
+        onEnter(items[0], function(){ fadeUp(items, {y:22, s:0.05}); }, 'top 88%');
+        items.forEach(function(d){
+          d.addEventListener('toggle', function(){
+            if(d.open) gsap.fromTo(d.querySelector('.a'), {opacity:0, y:-6}, {opacity:1, y:0, duration:0.5, ease:E});
+            refreshSoon(120);                                               // the page got taller or shorter
+          });
+        });
+      }
+
+      /* -- final CTA: the shop window opens up -- */
+      if(sec.classList.contains('final')){
+        var bg = sec.querySelector('.win-bg'), inner = sec.querySelector('.window > .wrap');
+        mm.add({small:'(max-width: 700px)', big:'(min-width: 701px)'}, function(ctx){
+          var s = ctx.conditions.small;
+          var st = {trigger:sec, start:'top 95%', end:'bottom 98%', scrub:SCRUB, onToggle:layerWhileActive([bg])};
+          gsap.fromTo(bg, {scaleX: s ? 0.82 : 0.7, scaleY: s ? 0.9 : 0.82}, {scaleX:1, scaleY:1, ease:'none', scrollTrigger:st});
+          gsap.fromTo(inner, {y:70}, {y:0, ease:'none', scrollTrigger:{trigger:sec, start:'top 95%', end:'bottom 98%', scrub:SCRUB}});
+        });
+        var fs = $('.final-sub, .signup, .trust', sec);
+        onEnter(fs[0], function(){ fadeUp(fs, {delay:0.3, s:0.07}); }, 'top 92%');
+      }
+    });
+
+    var foot = document.querySelector('footer');
+    onEnter(foot, function(){ fadeUp(foot, {y:16}); }, 'top 99%');
+
+    /* ================= PAGE-WIDE (refresh last: they depend on the full page height) ================= */
+    /* one listener for scroll velocity + top bar direction */
+    var barShown = true;
+    function showBar(v){
+      if(v === barShown) return; barShown = v;
+      gsap.to(topbar, {yPercent: v ? 0 : -100, duration: v ? 0.6 : 0.45, ease: v ? E : 'power3.out', overwrite:true});
+    }
+    ScrollTrigger.create({start:0, end:'max', refreshPriority:-1, onUpdate:function(self){
+      vel = self.getVelocity(); velAt = gsap.ticker.time;
+      if(self.direction) dir = self.direction;
+      if(pageOpen) showBar(self.scroll() < 180 || self.direction === -1);
+    }});
+    gsap.fromTo('#progressBar', {scaleX:0}, {scaleX:1, ease:'none', scrollTrigger:{start:0, end:'max', scrub:0.3, refreshPriority:-1}});
+
+    /* ================= LITTLE INTERACTIONS ================= */
+    if(fine){
+      /* cursor halo */
+      if(window.innerWidth >= 900){
+        var cur = document.getElementById('cursor'), curOn = false, hoverEl = null;
+        gsap.set(cur, {scale:0.3});
+        var cx = gsap.quickTo(cur, 'x', {duration:0.3, ease:'power3'}), cy = gsap.quickTo(cur, 'y', {duration:0.3, ease:'power3'});
+        window.addEventListener('pointermove', function(e){
+          if(e.pointerType && e.pointerType !== 'mouse') return;
+          if(!curOn){ curOn = true; cx(e.clientX, e.clientX); cy(e.clientY, e.clientY); gsap.to(cur, {opacity:1, duration:0.3, overwrite:'auto'}); return; }
+          cx(e.clientX); cy(e.clientY);
+        }, {passive:true});
+        window.addEventListener('mouseout', function(e){
+          if(e.relatedTarget) return;
+          curOn = false; gsap.to(cur, {opacity:0, duration:0.3, overwrite:'auto'});
+        }, {passive:true});
+        document.addEventListener('pointerover', function(e){
+          var t = e.target.closest ? e.target.closest('a, button, summary, input, .card, .step') : null;
+          if(t === hoverEl) return; hoverEl = t;
+          var field = t && t.matches('input');
+          gsap.to(cur, {scale: !t ? 0.3 : field ? 0.15 : 1.1, opacity: !t || field ? 1 : 0.16, duration:0.35, ease:'power3', overwrite:'auto'});
+        }, {passive:true});
+      }
+
+      /* magnetic buttons: their box is measured on enter, not on every mouse move */
+      var magnets = [];
+      $('.signup .btn, .cta-mini').forEach(function(b){
+        var bx = gsap.quickTo(b, 'x', {duration:0.5, ease:'power3'}), by = gsap.quickTo(b, 'y', {duration:0.5, ease:'power3'});
+        var m = {r:null};
+        magnets.push(m);
+        b.addEventListener('pointerenter', function(){ m.r = b.getBoundingClientRect(); }, {passive:true});
+        b.addEventListener('pointermove', function(e){
+          if(!m.r) m.r = b.getBoundingClientRect();
+          bx((e.clientX - m.r.left - m.r.width / 2) * 0.3); by((e.clientY - m.r.top - m.r.height / 2) * 0.4);
+        }, {passive:true});
+        b.addEventListener('pointerleave', function(){ m.r = null; bx(0); by(0); }, {passive:true});
+      });
+
+      /* cards lift + a glow follows the cursor (transform only) */
+      $('.card').forEach(function(c){
+        var glow = document.createElement('i'); glow.className = 'card-glow'; glow.setAttribute('aria-hidden', 'true');
+        c.insertBefore(glow, c.firstChild);
+        var gx = gsap.quickTo(glow, 'x', {duration:0.45, ease:'power3'}), gy = gsap.quickTo(glow, 'y', {duration:0.45, ease:'power3'});
+        var m = {r:null};
+        magnets.push(m);
+        c.addEventListener('pointerenter', function(e){
+          m.r = c.getBoundingClientRect();
+          gx(e.clientX - m.r.left, e.clientX - m.r.left); gy(e.clientY - m.r.top, e.clientY - m.r.top);
+          gsap.to(glow, {opacity:1, duration:0.4, ease:E, overwrite:'auto'});
+          gsap.to(c, {y:-6, duration:0.5, ease:E, overwrite:'auto'});
+        }, {passive:true});
+        c.addEventListener('pointermove', function(e){
+          if(!m.r) m.r = c.getBoundingClientRect();
+          gx(e.clientX - m.r.left); gy(e.clientY - m.r.top);
+        }, {passive:true});
+        c.addEventListener('pointerleave', function(){
+          m.r = null;
+          gsap.to(glow, {opacity:0, duration:0.5, ease:E, overwrite:'auto'});
+          gsap.to(c, {y:0, duration:0.6, ease:E, overwrite:'auto'});
+        }, {passive:true});
+      });
+      /* boxes move when the page scrolls, so forget them (measured again on the next pointer move) */
+      window.addEventListener('scroll', function(){ for(var i = 0; i < magnets.length; i++) magnets[i].r = null; }, {passive:true});
+    }
+
+    /* ================= TEXT CHANGES (language switch, spots filled, form messages) ================= */
+    function inView(el){ var r = el.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < window.innerHeight; }
+    window.__motionText = function(els){
+      splitAll();
+      var heads = [], fades = [];
+      els.forEach(function(el){
+        var sp = el.closest('.split');
+        if(sp){ if(sp.classList.contains('is-in') && heads.indexOf(sp) < 0) heads.push(sp); return; }
+        if(el.closest('.mq, .lang, .pane.before')) return;                  // scroll-driven or always moving
+        if(el.closest('[data-r]:not(.is-in), .hang-sign:not(.is-in), .price-tag:not(.is-in), .phone:not(.is-in), .chip:not(.is-in)')) return;
+        fades.push(el);
+      });
+      heads = heads.filter(inView); fades = fades.filter(inView);           // read everything first, then animate
+      heads.forEach(function(h){
+        gsap.fromTo(words(h), {y:0, yPercent:105}, {y:0, yPercent:0, duration:0.7, ease:E, stagger:0.025, overwrite:'auto'});
+      });
+      if(fades.length) gsap.fromTo(fades, {opacity:0}, {opacity:1, duration:0.5, ease:'power2.out', stagger:0.01, overwrite:'auto', clearProps:'opacity'});
+      refreshSoon(160);
+    };
+
+    /* ================= GO ================= */
+    ScrollTrigger.refresh();
+    mqs.forEach(function(m){ if(!m.st.isActive) m.tw.pause(); });
+    if(document.fonts && document.fonts.status !== 'loaded') document.fonts.ready.then(function(){ refreshSoon(0); });
+    if(document.readyState !== 'complete') window.addEventListener('load', function(){ refreshSoon(0); });
+
+    var seen = root.classList.contains('seen');
+    try{ localStorage.setItem('vitrin-seen', '1'); }catch(e){}
+    if(!pre){ introBusy = true; openPage(); return; }
+    var exit = gsap.timeline({paused:true, onComplete:function(){ if(pre.parentNode) pre.parentNode.removeChild(pre); }});
+    exit.to('.pl-l', {yPercent:-120, duration:0.42, ease:'power3.in', stagger:0.024}, 0)
+        .to('.pl-row', {opacity:0, duration:0.24, ease:'power2.in'}, 0)
+        .to(pre, {yPercent:-100, duration:0.75, ease:'expo.inOut'}, seen ? 0 : 0.12)
+        .add(openPage, seen ? 0.2 : 0.42);
+    var wait = Math.max(0, (seen ? 0 : 700) - (performance.now() - (window.__plT0 || 0))) / 1000;   // let the logo land
+    gsap.delayedCall(wait, function(){ introBusy = true; exit.play(); });
+  }
+})();
+</script>
+</body>
+</html>
